@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Karachi — A Curated City Guide</title>
+
+  <!-- Leaflet: free open-source map library (no API key needed) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      /* ── Karachi palette: Arabian-Sea teal, ajrak crimson, Sindhi gold ── */
+      --crimson:#B03A2E; --teal:#1A6B7A; --gold:#D4A017;
+      --sea:#0E6E8C; --sand:#FAF6EF; --off:#F1EADD;
+      --dark:#161211; --mid:#5A4C3E; --text:#241C15; --border:#E6DDCE;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{height:100%;}
+    body{font-family:'Inter',sans-serif;background:var(--sand);color:var(--text);
+         display:flex;flex-direction:column;min-height:100vh;}
+
+    /* ─── HERO ─────────────────────────────── */
+    .hero{background:linear-gradient(135deg,#161211 0%,#5A1A12 45%,#0E4A5C 100%);
+          padding:.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;
+          flex-wrap:wrap;gap:.8rem;flex-shrink:0;}
+    .hero-left{display:flex;align-items:baseline;gap:1rem;flex-wrap:wrap;}
+    .hero h1{font-family:'Playfair Display',serif;font-size:1.9rem;color:#FAF6EF;letter-spacing:-.02em;}
+    .hero-sub{color:var(--gold);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;}
+    .hero-chips{display:flex;gap:.9rem;flex-wrap:wrap;}
+    .hero-chip{color:rgba(255,255,255,.55);font-size:.7rem;display:flex;align-items:center;gap:.3rem;}
+
+    /* ─── LEGEND OF MUSTS ──────────────────── */
+    .musts-strip{background:var(--dark);border-bottom:2px solid var(--crimson);flex-shrink:0;padding:.55rem 1rem;}
+    .musts-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.45rem;}
+    .musts-head-title{font-family:'Playfair Display',serif;font-size:.75rem;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;}
+    .musts-head-sub{font-size:.62rem;color:rgba(255,255,255,.42);letter-spacing:.05em;}
+    .musts-scroll{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.2rem;}
+    .musts-scroll::-webkit-scrollbar{height:3px;}
+    .musts-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:2px;}
+    .must-card{flex-shrink:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+               border-radius:8px;padding:.4rem .7rem;cursor:pointer;transition:all .18s;
+               display:flex;align-items:center;gap:.5rem;min-width:fit-content;}
+    .must-card:hover{background:rgba(176,58,46,.28);border-color:var(--crimson);}
+    .must-emoji{font-size:1.15rem;line-height:1;}
+    .must-text{display:flex;flex-direction:column;}
+    .must-title{font-size:.72rem;font-weight:600;color:rgba(255,255,255,.9);white-space:nowrap;}
+    .must-where{font-size:.62rem;color:rgba(255,255,255,.45);white-space:nowrap;}
+
+    /* ─── LAYOUT ───────────────────────────── */
+    .main{display:grid;grid-template-columns:390px 1fr;flex:1;min-height:0;}
+    @media(max-width:820px){ .main{grid-template-columns:1fr;} #map{height:55vh;order:-1;} }
+
+    /* ─── LEFT PANEL ───────────────────────── */
+    .panel{display:flex;flex-direction:column;border-right:1px solid var(--border);min-height:0;background:var(--sand);}
+    .panel-controls{padding:.7rem .8rem;border-bottom:1px solid var(--border);flex-shrink:0;background:#fff;}
+    .search-box{width:100%;padding:.5rem .8rem;border:1.5px solid var(--border);border-radius:9px;
+                font-family:'Inter',sans-serif;font-size:.85rem;margin-bottom:.55rem;}
+    .search-box:focus{outline:none;border-color:var(--teal);}
+    .filter-tags{display:flex;gap:.35rem;flex-wrap:wrap;}
+    .filter-tag{padding:.24rem .6rem;border-radius:20px;font-size:.64rem;font-weight:700;cursor:pointer;
+                border:1.5px solid currentColor;background:transparent;transition:all .18s;
+                letter-spacing:.04em;text-transform:uppercase;font-family:'Inter',sans-serif;}
+    .filter-tag:hover{opacity:.72;}
+    .filter-tag.active{color:#fff!important;}
+    .filter-tag[data-cat="all"]{color:#5A1A12;}      .filter-tag[data-cat="all"].active{background:#5A1A12;}
+    .filter-tag[data-cat="food"]{color:#B03A2E;}     .filter-tag[data-cat="food"].active{background:#B03A2E;}
+    .filter-tag[data-cat="cafe"]{color:#6C3483;}     .filter-tag[data-cat="cafe"].active{background:#6C3483;}
+    .filter-tag[data-cat="heritage"]{color:#8A5A00;} .filter-tag[data-cat="heritage"].active{background:#8A5A00;}
+    .filter-tag[data-cat="museum"]{color:#1A6B7A;}   .filter-tag[data-cat="museum"].active{background:#1A6B7A;}
+    .filter-tag[data-cat="bazaar"]{color:#935116;}   .filter-tag[data-cat="bazaar"].active{background:#935116;}
+    .filter-tag[data-cat="beach"]{color:#0E6E8C;}    .filter-tag[data-cat="beach"].active{background:#0E6E8C;}
+    .filter-tag[data-cat="park"]{color:#1E6B3C;}     .filter-tag[data-cat="park"].active{background:#1E6B3C;}
+
+    .cards{overflow-y:auto;flex:1;min-height:0;padding:.6rem;}
+    .card{background:#fff;border:1px solid var(--border);border-radius:11px;padding:.7rem .8rem;
+          margin-bottom:.55rem;cursor:pointer;transition:all .16s;border-left:4px solid var(--border);}
+    .card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-1px);}
+    .card.tier-1{border-left-color:var(--crimson);} .card.tier-2{border-left-color:var(--gold);}
+    .card.tier-3{border-left-color:var(--teal);}
+    .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;}
+    .card-name{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;line-height:1.15;}
+    .card-hood{font-size:.66rem;color:var(--mid);text-transform:uppercase;letter-spacing:.06em;margin-top:.15rem;}
+    .card-desc{font-size:.78rem;color:#4a3f33;line-height:1.4;margin:.4rem 0 .35rem;}
+    .card-meta{display:flex;gap:.7rem;flex-wrap:wrap;font-size:.68rem;color:var(--mid);margin-bottom:.35rem;}
+    .card-meta b{color:var(--text);font-weight:600;}
+    .card-tip{font-size:.72rem;background:var(--off);border-radius:7px;padding:.35rem .5rem;color:#4a3f33;}
+    .card-tip b{color:var(--crimson);}
+    .card-actions{display:flex;gap:.4rem;margin-top:.5rem;}
+    .btn{font-family:'Inter',sans-serif;font-size:.68rem;font-weight:600;padding:.32rem .6rem;border-radius:7px;
+         border:none;cursor:pointer;transition:all .15s;}
+    .btn-add{background:var(--teal);color:#fff;} .btn-add:hover{background:#12525f;}
+    .btn-map{background:var(--off);color:var(--text);text-decoration:none;display:inline-block;}
+    .btn-map:hover{background:#e6ddce;}
+    .empty{padding:2rem 1rem;text-align:center;color:var(--mid);font-size:.85rem;}
+
+    /* ─── MAP ──────────────────────────────── */
+    #map{height:100%;width:100%;}
+    .leaflet-popup-content-wrapper{border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.15);}
+    .leaflet-popup-content{margin:10px 12px;font-family:'Inter',sans-serif;}
+    .pop-name{font-family:'Playfair Display',serif;font-weight:700;font-size:.95rem;}
+    .pop-hood{font-size:.65rem;color:var(--mid);text-transform:uppercase;letter-spacing:.05em;margin:.1rem 0 .3rem;}
+    .pop-desc{font-size:.75rem;color:#4a3f33;line-height:1.35;}
+
+    /* ─── ITINERARY BAR + POPUP ────────────── */
+    .itin-fab{position:fixed;right:1rem;bottom:1rem;z-index:1000;background:var(--crimson);color:#fff;
+              border:none;border-radius:30px;padding:.7rem 1.2rem;font-weight:700;font-size:.82rem;
+              cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.25);display:flex;align-items:center;gap:.5rem;}
+    .itin-fab .count{background:#fff;color:var(--crimson);border-radius:12px;padding:.05rem .5rem;font-size:.72rem;}
+    .itin-popup{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1001;display:none;
+                align-items:center;justify-content:center;padding:1rem;}
+    .itin-popup.open{display:flex;}
+    .itin-box{background:#fff;border-radius:14px;max-width:460px;width:100%;max-height:82vh;
+              display:flex;flex-direction:column;overflow:hidden;}
+    .itin-header{background:var(--dark);color:#fff;padding:.9rem 1.1rem;display:flex;justify-content:space-between;align-items:center;}
+    .itin-header h2{font-family:'Playfair Display',serif;font-size:1.1rem;}
+    .itin-close{background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;line-height:1;}
+    .itin-list{overflow-y:auto;padding:.8rem;flex:1;}
+    .itin-item{display:flex;justify-content:space-between;align-items:center;gap:.6rem;
+               padding:.55rem;border:1px solid var(--border);border-radius:9px;margin-bottom:.5rem;}
+    .itin-item-name{font-weight:600;font-size:.85rem;}
+    .itin-item-hood{font-size:.66rem;color:var(--mid);}
+    .itin-remove{background:none;border:none;color:var(--crimson);cursor:pointer;font-size:.9rem;}
+    .itin-empty{text-align:center;color:var(--mid);padding:2rem 1rem;font-size:.85rem;}
+
+    footer{background:var(--dark);color:rgba(255,255,255,.55);font-size:.68rem;text-align:center;padding:.6rem;flex-shrink:0;}
+    footer a{color:var(--gold);text-decoration:none;}
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════ HERO ═══════════════ -->
+  <header class="hero">
+    <div class="hero-left">
+      <h1>Karachi</h1>
+      <span class="hero-sub">A Curated City Guide</span>
+    </div>
+    <div class="hero-chips">
+      <span class="hero-chip">🌊 City of Lights</span>
+      <span class="hero-chip">🍢 Street-food capital</span>
+      <span class="hero-chip">🏛 Colonial heritage</span>
+    </div>
+  </header>
+
+  <!-- ═══════════════ LEGEND OF MUSTS ═══════════════ -->
+  <section class="musts-strip">
+    <div class="musts-head">
+      <span class="musts-head-title">The Essentials</span>
+      <span class="musts-head-sub">— tap to jump to it on the map</span>
+    </div>
+    <div class="musts-scroll" id="musts-scroll"><!-- injected by JS --></div>
+  </section>
+
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <div class="main">
+    <!-- LEFT PANEL -->
+    <aside class="panel">
+      <div class="panel-controls">
+        <input class="search-box" id="search-input" type="text" placeholder="Search places, neighborhoods…">
+        <div class="filter-tags">
+          <button class="filter-tag active" data-cat="all">All</button>
+          <button class="filter-tag" data-cat="food">Food</button>
+          <button class="filter-tag" data-cat="cafe">Cafés</button>
+          <button class="filter-tag" data-cat="heritage">Heritage</button>
+          <button class="filter-tag" data-cat="museum">Museums</button>
+          <button class="filter-tag" data-cat="bazaar">Bazaars</button>
+          <button class="filter-tag" data-cat="beach">Beach</button>
+          <button class="filter-tag" data-cat="park">Parks</button>
+        </div>
+      </div>
+      <div class="cards" id="cards"><!-- injected by JS --></div>
+    </aside>
+
+    <!-- MAP -->
+    <div id="map"></div>
+  </div>
+
+  <footer>
+    Karachi City Guide · built with <a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>
+    + OpenStreetMap · a single static HTML file
+  </footer>
+
+  <!-- ITINERARY -->
+  <button class="itin-fab" id="itin-fab">✦ My Itinerary <span class="count" id="itin-count">0</span></button>
+  <div class="itin-popup" id="itin-popup">
+    <div class="itin-box">
+      <div class="itin-header">
+        <h2>✦ My Karachi Itinerary</h2>
+        <button class="itin-close" id="itin-close">×</button>
+      </div>
+      <div class="itin-list" id="itin-list"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+  // ════════════════════════════════════════════════════════════════
+  //  PLACES DATA  —  curated Karachi guide (food · cafés · heritage)
+  // ────────────────────────────────────────────────────────────────
+  //  Coordinates are close approximations — verify/adjust any spot by
+  //  right-clicking it in Google Maps (first two numbers = lat, lng).
+  //  tier: 1 = must-do · 2 = highly recommended · 3 = worth it
+  //  category options: food cafe heritage museum bazaar beach park
+  // ════════════════════════════════════════════════════════════════
+  const activities = [
+
+    // ─────────────── FOOD ───────────────
+    {id:1, tier:1, name:"Burns Road Food Street", neighborhood:"Saddar",
+     lat:24.8607, lng:67.0227, category:["food","heritage"],
+     description:"Karachi's oldest and most legendary food street — nihari, haleem, dahi baray and rabri from stalls that have run for generations. Comes alive after dark.",
+     mustOrder:"Nihari with naan; finish with rabri or falooda",
+     tip:"Go after 8pm when it's busiest and freshest. Mostly cash only.",
+     duration:"1–2 hrs", price:"Rs", mapsQuery:"Burns Road Food Street Karachi"},
+
+    {id:2, tier:1, name:"Javed Nihari", neighborhood:"Bahadurabad",
+     lat:24.8901, lng:67.0665, category:["food"],
+     description:"One of the city's most famous nihari houses — slow-cooked beef shank simmered overnight, deep and spicy. A Karachi breakfast institution.",
+     mustOrder:"Maghaz nihari + khameeri roti + extra gravy",
+     tip:"Best in the morning. Ask for 'taar' (bone marrow) if you want the full experience.",
+     duration:"45 min", price:"Rs", mapsQuery:"Javed Nihari Bahadurabad Karachi"},
+
+    {id:3, tier:2, name:"Café Student Biryani", neighborhood:"Saddar",
+     lat:24.8586, lng:67.0330, category:["food"],
+     description:"The original branch of Karachi's cult biryani chain — fiery, aromatic Sindhi-style beef biryani that defined the city's biryani standard.",
+     mustOrder:"Beef biryani + a bottle of chilled Pakola",
+     tip:"Takeaway is quick; dine-in is bare-bones. Order 'double masala' if you like it hot.",
+     duration:"45 min", price:"Rs", mapsQuery:"Student Biryani Saddar Karachi"},
+
+    {id:4, tier:1, name:"Bar B.Q. Tonight", neighborhood:"Boat Basin, Clifton",
+     lat:24.8290, lng:67.0345, category:["food"],
+     description:"A multi-storey Karachi grill legend — smoky seekh kababs, tikka boti and BBQ platters served late into the night with rooftop city views.",
+     mustOrder:"Beef seekh kabab + chicken malai boti + garlic naan",
+     tip:"Rooftop is best on a cool evening. Expect a wait on weekends.",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Bar B.Q. Tonight Boat Basin Karachi"},
+
+    {id:5, tier:1, name:"Kolachi (Do Darya)", neighborhood:"DHA Phase 8",
+     lat:24.7906, lng:67.0492, category:["food"],
+     description:"Karachi's iconic seaside restaurant on the Do Darya boardwalk — Pakistani cuisine on wooden decks right over the Arabian Sea, breeze and waves included.",
+     mustOrder:"Karahi + fresh naan; grilled prawns if in season",
+     tip:"Go for sunset and stay for dinner. Book ahead on weekends.",
+     duration:"2 hrs", price:"Rs Rs Rs", mapsQuery:"Kolachi Restaurant Do Darya Karachi"},
+
+    {id:6, tier:2, name:"Boat Basin Food Street", neighborhood:"Clifton Block 5",
+     lat:24.8300, lng:67.0350, category:["food"],
+     description:"A cluster of open-air eateries and chai spots — bun kababs, charga, fresh juices and dhaba chai, buzzing till the early hours.",
+     mustOrder:"Bun kabab + doodh patti chai",
+     tip:"Late-night is the whole point. Great for a post-dinner chai run.",
+     duration:"1 hr", price:"Rs", mapsQuery:"Boat Basin Food Street Karachi"},
+
+    {id:7, tier:3, name:"Waheed's Barbeque (Waheed Kabab House)", neighborhood:"Saddar",
+     lat:24.8598, lng:67.0232, category:["food"],
+     description:"An old-school Saddar grill famous for buttery beef boti and tikka — no frills, big flavour, a favourite of Burns Road regulars.",
+     mustOrder:"Beef boti + roghni naan",
+     tip:"Small and busy — early evening is calmest.",
+     duration:"45 min", price:"Rs", mapsQuery:"Waheed Kabab House Saddar Karachi"},
+
+    {id:8, tier:3, name:"Delhi Rabri House", neighborhood:"Burns Road",
+     lat:24.8609, lng:67.0225, category:["food"],
+     description:"A Burns Road sweet institution — thick, slow-reduced rabri and creamy kulfi falooda that locals have queued for over decades.",
+     mustOrder:"Rabri + kulfa (kulfi falooda)",
+     tip:"The perfect sweet finish after a Burns Road dinner crawl.",
+     duration:"20 min", price:"Rs", mapsQuery:"Delhi Rabri House Burns Road Karachi"},
+
+    {id:9, tier:2, name:"Café Aylanto", neighborhood:"Zamzama, DHA",
+     lat:24.8155, lng:67.0335, category:["food","cafe"],
+     description:"A polished Mediterranean-Italian favourite on Zamzama — wood-fired dishes, pastas and a well-loved brunch in an elegant setting.",
+     mustOrder:"Chargrilled prawns + tiramisu",
+     tip:"Great for a slower, upscale meal. Reserve for weekend brunch.",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Cafe Aylanto Zamzama Karachi"},
+
+    {id:10, tier:3, name:"Kaybee's Snacks", neighborhood:"Bahadurabad",
+     lat:24.8898, lng:67.0668, category:["food"],
+     description:"A beloved neighbourhood snack-and-ice-cream parlour — anda shami, spring rolls and generous sundaes; a Karachi childhood in a booth.",
+     mustOrder:"Anda shami + a scoop sundae",
+     tip:"Family-friendly and reliably good for a casual bite.",
+     duration:"45 min", price:"Rs", mapsQuery:"Kaybees Snacks Bahadurabad Karachi"},
+
+    // ─────────────── CAFÉS ───────────────
+    {id:11, tier:2, name:"Espresso", neighborhood:"Zamzama, DHA",
+     lat:24.8160, lng:67.0360, category:["cafe"],
+     description:"Karachi's original modern coffeehouse chain — dependable espresso, cakes and all-day breakfast; a longtime meet-up spot for the city's creatives.",
+     mustOrder:"Cappuccino + chocolate fudge cake",
+     tip:"The Zamzama branch is the classic. Good wifi for a work session.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Espresso Zamzama Karachi"},
+
+    {id:12, tier:2, name:"Butlers Chocolate Café", neighborhood:"Clifton",
+     lat:24.8140, lng:67.0340, category:["cafe"],
+     description:"An indulgent chocolate-first café — rich hot chocolate, truffle cakes and dessert platters, a Karachi go-to for a sweet afternoon.",
+     mustOrder:"Belgian hot chocolate + chocolate fondant",
+     tip:"Come for dessert rather than a full meal. Cosy and reliably busy.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Butlers Chocolate Cafe Clifton Karachi"},
+
+    {id:13, tier:2, name:"Koel Café", neighborhood:"Clifton",
+     lat:24.8125, lng:67.0310, category:["cafe","heritage"],
+     description:"A serene garden café set within the Koel art gallery and craft complex — seasonal, produce-led plates under trees, one of Karachi's prettiest lunch spots.",
+     mustOrder:"Seasonal salad + fresh lemonade",
+     tip:"Pair lunch with the adjoining gallery and craft store. Lovely by day.",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Koel Cafe Clifton Karachi"},
+
+    {id:14, tier:2, name:"Café Flo", neighborhood:"Clifton",
+     lat:24.8130, lng:67.0295, category:["cafe","food"],
+     description:"A long-running French bistro and café — quiches, crêpes, steak frites and an unhurried, candle-lit European mood rare in the city.",
+     mustOrder:"Crêpe or the steak; a good glass of something",
+     tip:"Book ahead for dinner. One of Karachi's most atmospheric sit-downs.",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Cafe Flo Clifton Karachi"},
+
+    {id:15, tier:3, name:"Xander's", neighborhood:"Bukhari, DHA",
+     lat:24.8085, lng:67.0680, category:["cafe","food"],
+     description:"A bright, plant-filled café-restaurant popular for breakfast and brunch — big menu, generous portions and an easy all-day vibe.",
+     mustOrder:"Full breakfast + a cold brew",
+     tip:"Weekend mornings get packed. Good for groups.",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Xanders Bukhari DHA Karachi"},
+
+    {id:16, tier:3, name:"Mocca Coffee", neighborhood:"Khadda Market, DHA",
+     lat:24.8000, lng:67.0450, category:["cafe"],
+     description:"A cosy specialty-coffee café tucked in Khadda Market — proper coffee, pastries and a quiet corner to read or work.",
+     mustOrder:"Flat white + a fresh croissant",
+     tip:"Calmer than the Zamzama cafés — a good escape from the traffic.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Mocca Coffee Khadda Market Karachi"},
+
+    // ─────────────── HERITAGE ───────────────
+    {id:17, tier:1, name:"Frere Hall", neighborhood:"Civil Lines / Saddar",
+     lat:24.8467, lng:67.0299, category:["heritage","park"],
+     description:"An 1865 Venetian-Gothic landmark set in leafy gardens, with Sadequain's unfinished ceiling mural inside and a weekend book bazaar on the lawns.",
+     tip:"Visit the mural upstairs. Sunday morning is best for the outdoor book stalls.",
+     duration:"1 hr", price:"Free", mapsQuery:"Frere Hall Karachi"},
+
+    {id:18, tier:1, name:"Empress Market", neighborhood:"Saddar",
+     lat:24.8698, lng:67.0304, category:["heritage","bazaar"],
+     description:"A grand 1889 colonial market hall with a towering clock spire — spices, dry fruit, textiles and pets crammed into cathedral-like Victorian arcades.",
+     tip:"Go for the architecture and the spice section. Watch your belongings in the crowds.",
+     duration:"1 hr", price:"Free", mapsQuery:"Empress Market Saddar Karachi"},
+
+    {id:19, tier:1, name:"Mohatta Palace Museum", neighborhood:"Clifton",
+     lat:24.8138, lng:67.0300, category:["museum","heritage"],
+     description:"A 1927 pink-stone palace of Rajasthani design, now a museum with rotating art and history exhibitions and beautifully restored gardens.",
+     tip:"Closed Mondays. Check the current exhibition — the building itself is the highlight.",
+     duration:"1.5 hrs", price:"Rs", mapsQuery:"Mohatta Palace Museum Karachi"},
+
+    {id:20, tier:1, name:"Mazar-e-Quaid", neighborhood:"Jamshed Town",
+     lat:24.8756, lng:67.0407, category:["heritage"],
+     description:"The white-marble mausoleum of Muhammad Ali Jinnah, founder of Pakistan — a serene, monumental landmark set on a raised platform with a ceremonial guard.",
+     tip:"Go early or near the guard-changing. Modest dress; shoes off inside.",
+     duration:"1 hr", price:"Free", mapsQuery:"Mazar-e-Quaid Karachi"},
+
+    {id:21, tier:2, name:"St. Patrick's Cathedral", neighborhood:"Saddar",
+     lat:24.8630, lng:67.0270, category:["heritage"],
+     description:"Karachi's grand Gothic-Revival Catholic cathedral, consecrated in 1881 — twin spires, stained glass and a calm courtyard in the heart of Saddar.",
+     tip:"Respect service times. The courtyard and façade are worth the short stop.",
+     duration:"30 min", price:"Free", mapsQuery:"St Patricks Cathedral Saddar Karachi"},
+
+    {id:22, tier:2, name:"Wazir Mansion (Quaid's Birthplace)", neighborhood:"Kharadar",
+     lat:24.8497, lng:67.0106, category:["heritage","museum"],
+     description:"The restored 19th-century house where Jinnah was born, now a national monument and small museum in the old city's tightly-packed Kharadar quarter.",
+     tip:"Combine with a walk through old-city Kharadar/Mithadar. Closed some public holidays.",
+     duration:"45 min", price:"Free", mapsQuery:"Wazir Mansion Kharadar Karachi"},
+
+    {id:23, tier:2, name:"Jehangir Kothari Parade", neighborhood:"Clifton",
+     lat:24.8090, lng:67.0270, category:["heritage","park"],
+     description:"An elegant 1920s promenade of domed pavilions and stone steps (the Lady Lloyd Pier) leading toward the sea — faded grandeur and sunset strolls.",
+     tip:"Golden hour is beautiful. Pair with Bagh Ibne Qasim next door.",
+     duration:"45 min", price:"Free", mapsQuery:"Jehangir Kothari Parade Clifton Karachi"},
+
+    {id:24, tier:3, name:"Merewether Clock Tower", neighborhood:"Kharadar",
+     lat:24.8480, lng:67.0130, category:["heritage"],
+     description:"An 1892 Gothic-Revival clock tower in yellow Gizri stone, one of the finest surviving pieces of Victorian Karachi at the edge of the old business district.",
+     tip:"A quick architectural stop on an old-city heritage walk. Best photographed by day.",
+     duration:"20 min", price:"Free", mapsQuery:"Merewether Tower Karachi"},
+
+    {id:25, tier:3, name:"Denso Hall", neighborhood:"M.A. Jinnah Road",
+     lat:24.8560, lng:67.0155, category:["heritage"],
+     description:"An 1886 colonial hall and former library in warm sandstone on M.A. Jinnah Road, recently revived with a pedestrian heritage streetscape around it.",
+     tip:"Part of the M.A. Jinnah Road heritage corridor — combine with nearby old buildings.",
+     duration:"20 min", price:"Free", mapsQuery:"Denso Hall MA Jinnah Road Karachi"},
+
+    {id:26, tier:3, name:"Hindu Gymkhana", neighborhood:"near Mazar-e-Quaid",
+     lat:24.8720, lng:67.0340, category:["heritage"],
+     description:"A striking 1925 building blending Mughal and colonial styles with domed pavilions — a landmark of pre-Partition Karachi near the Quaid's mausoleum.",
+     tip:"Admire from outside; access can be restricted. Pairs with a Mazar-e-Quaid visit.",
+     duration:"20 min", price:"Free", mapsQuery:"Hindu Gymkhana Karachi"},
+
+    // ─────────────── MUSEUMS ───────────────
+    {id:27, tier:2, name:"National Museum of Pakistan", neighborhood:"Burns Garden, Saddar",
+     lat:24.8535, lng:67.0230, category:["museum","heritage"],
+     description:"The country's principal museum — Indus Valley artefacts from Mohenjo-daro, Gandhara sculpture, coins and manuscripts across a broad national collection.",
+     tip:"The Indus Valley and Gandhara galleries are the highlights. Closed some public holidays.",
+     duration:"1.5 hrs", price:"Rs", mapsQuery:"National Museum of Pakistan Karachi"},
+
+    {id:28, tier:3, name:"Quaid-e-Azam House (Flagstaff House)", neighborhood:"Saddar",
+     lat:24.8490, lng:67.0350, category:["museum","heritage"],
+     description:"Jinnah's elegant former residence, a 1868 colonial bungalow preserved with his personal belongings and furniture — an intimate look at the founder's life.",
+     tip:"Quiet and quick. Combine with Frere Hall a short drive away. Closed Mondays.",
+     duration:"45 min", price:"Rs", mapsQuery:"Quaid-e-Azam House Museum Flagstaff Karachi"},
+
+    // ─────────────── BAZAARS ───────────────
+    {id:29, tier:2, name:"Zainab Market", neighborhood:"Saddar",
+     lat:24.8590, lng:67.0270, category:["bazaar"],
+     description:"A warren of stalls famous for export-surplus clothing, denim, leather jackets and souvenirs — Karachi's classic bargain-hunting bazaar.",
+     tip:"Bargain hard and check stitching. Best on a weekday to avoid the crush.",
+     duration:"1 hr", price:"Rs", mapsQuery:"Zainab Market Saddar Karachi"},
+
+    {id:30, tier:3, name:"Bohri Bazaar", neighborhood:"Saddar",
+     lat:24.8615, lng:67.0285, category:["bazaar"],
+     description:"A dense, historic Saddar market for fabrics, embroidery, jewellery and household goods — chaotic, colourful and quintessentially old Karachi.",
+     tip:"Great for cloth and trimmings. Go with time and patience; it's busy.",
+     duration:"1 hr", price:"Rs", mapsQuery:"Bohri Bazaar Saddar Karachi"},
+
+    // ─────────────── BEACH & PARK ───────────────
+    {id:31, tier:2, name:"Clifton Beach (Sea View)", neighborhood:"Clifton",
+     lat:24.7900, lng:67.0286, category:["beach"],
+     description:"The city's most popular stretch of Arabian Sea coastline — camel rides, corn on the cob and a long promenade that fills up at sunset.",
+     tip:"Best at sunset. Don't swim far — currents are strong. Weekends are very crowded.",
+     duration:"1–2 hrs", price:"Free", mapsQuery:"Sea View Clifton Beach Karachi"},
+
+    {id:32, tier:2, name:"Manora Island", neighborhood:"Manora",
+     lat:24.7960, lng:66.9820, category:["heritage","beach"],
+     description:"A quiet peninsula across the harbour reached by boat from Keamari — a 19th-century lighthouse, an old church and Hindu temple, and empty beaches.",
+     tip:"Take a launch from Keamari. Half-day trip; carry water and sun cover.",
+     duration:"Half day", price:"Rs", mapsQuery:"Manora Island Lighthouse Karachi"},
+
+    {id:33, tier:3, name:"Bagh Ibne Qasim", neighborhood:"Clifton",
+     lat:24.8035, lng:67.0280, category:["park","heritage"],
+     description:"Karachi's largest park along the Clifton seafront, landscaped around the Abdullah Shah Ghazi shrine on the hill — gardens, sea breeze and city views.",
+     tip:"Evenings are pleasant. Combine with Jehangir Kothari Parade next door.",
+     duration:"1 hr", price:"Free", mapsQuery:"Bagh Ibne Qasim Clifton Karachi"}
+
+  ];
+
+  // ════════════════════════════════════════════════════════════════
+  //  "ESSENTIALS" STRIP  —  quick-jump highlights
+  // ════════════════════════════════════════════════════════════════
+  const musts = [
+    {emoji:"🍢", title:"Eat on Burns Road after dark", where:"Nihari, haleem, rabri", activityId:1},
+    {emoji:"🌊", title:"Dinner over the sea at Do Darya", where:"Kolachi's wooden decks", activityId:5},
+    {emoji:"🔥", title:"Late-night grill at BBQ Tonight", where:"Rooftop kababs in Boat Basin", activityId:4},
+    {emoji:"🏛", title:"Frere Hall & the Sadequain ceiling", where:"Gardens + Sunday book bazaar", activityId:17},
+    {emoji:"🕰", title:"Empress Market's Victorian arcades", where:"Spices under a colonial clock tower", activityId:18},
+    {emoji:"🎨", title:"Mohatta Palace", where:"Pink-stone 1927 palace museum", activityId:19},
+    {emoji:"🤍", title:"Pay respects at Mazar-e-Quaid", where:"Jinnah's white-marble mausoleum", activityId:20},
+    {emoji:"☕", title:"Coffee & cake at Espresso", where:"Karachi's original coffeehouse", activityId:11},
+    {emoji:"🌅", title:"Sunset at Sea View", where:"Camel rides on the Arabian Sea", activityId:31},
+  ];
+
+  // ════════════════════════════════════════════════════════════════
+  //  APP LOGIC  —  you shouldn't need to edit below this line
+  // ════════════════════════════════════════════════════════════════
+  const CAT_COLORS = {food:"#B03A2E",cafe:"#6C3483",heritage:"#8A5A00",museum:"#1A6B7A",
+                      bazaar:"#935116",beach:"#0E6E8C",park:"#1E6B3C"};
+
+  let map, markers = {}, activeCat = "all", searchTerm = "";
+
+  // --- Itinerary persistence (survives page refresh) ---
+  const ITIN_KEY = 'karachi-guide-itinerary';
+  function loadItin(){
+    try{
+      const saved = JSON.parse(localStorage.getItem(ITIN_KEY) || '[]');
+      // keep only ids that still exist in the current data
+      return new Set(saved.filter(id => activities.some(a => a.id === id)));
+    }catch(e){ return new Set(); }
+  }
+  function saveItin(){
+    try{ localStorage.setItem(ITIN_KEY, JSON.stringify([...itinerary])); }catch(e){}
+  }
+  const itinerary = loadItin();
+
+  // --- Map ---
+  map = L.map('map', {zoomControl:true}).setView([24.855, 67.02], 12);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution:'© OpenStreetMap © CARTO', maxZoom:19
+  }).addTo(map);
+
+  function catColor(a){ return CAT_COLORS[a.category[0]] || "#5A4C3E"; }
+
+  function makeIcon(a){
+    return L.divIcon({
+      className:'', iconSize:[18,18], iconAnchor:[9,9],
+      html:`<div style="width:16px;height:16px;border-radius:50%;background:${catColor(a)};
+             border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);"></div>`
+    });
+  }
+
+  function popupHtml(a){
+    return `<div class="pop-name">${a.name}</div>
+            <div class="pop-hood">${a.neighborhood}</div>
+            <div class="pop-desc">${a.description}</div>`;
+  }
+
+  // Build markers once
+  activities.forEach(a=>{
+    const m = L.marker([a.lat,a.lng],{icon:makeIcon(a)}).addTo(map).bindPopup(popupHtml(a));
+    markers[a.id] = m;
+  });
+
+  // --- Cards ---
+  function visible(a){
+    const matchCat = activeCat==="all" || a.category.includes(activeCat);
+    const t = searchTerm.toLowerCase();
+    const matchSearch = !t || a.name.toLowerCase().includes(t) ||
+                        a.neighborhood.toLowerCase().includes(t) ||
+                        a.description.toLowerCase().includes(t);
+    return matchCat && matchSearch;
+  }
+
+  function renderCards(){
+    const wrap = document.getElementById('cards');
+    const list = activities.filter(visible);
+    if(!list.length){ wrap.innerHTML = '<div class="empty">No places match. Try a different filter or search.</div>'; return; }
+    wrap.innerHTML = list.map(a=>`
+      <div class="card tier-${a.tier}" data-id="${a.id}">
+        <div class="card-top">
+          <div>
+            <div class="card-name">${a.name}</div>
+            <div class="card-hood">${a.neighborhood}</div>
+          </div>
+          ${a.price?`<span class="card-hood">${a.price}</span>`:''}
+        </div>
+        <div class="card-desc">${a.description}</div>
+        <div class="card-meta">
+          ${a.duration?`<span>⏱ <b>${a.duration}</b></span>`:''}
+          ${a.mustOrder?`<span>🍽 <b>${a.mustOrder}</b></span>`:''}
+        </div>
+        ${a.tip?`<div class="card-tip"><b>Tip:</b> ${a.tip}</div>`:''}
+        <div class="card-actions">
+          <button class="btn btn-add" data-add="${a.id}">＋ Itinerary</button>
+          <a class="btn btn-map" target="_blank" rel="noopener"
+             href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.mapsQuery)}">Open in Maps ↗</a>
+        </div>
+      </div>`).join('');
+
+    // wire card → fly to marker
+    wrap.querySelectorAll('.card').forEach(el=>{
+      el.addEventListener('click', e=>{
+        if(e.target.closest('[data-add]') || e.target.closest('a')) return;
+        const a = activities.find(x=>x.id==el.dataset.id);
+        map.flyTo([a.lat,a.lng], 15, {duration:.6});
+        markers[a.id].openPopup();
+      });
+    });
+    // wire add buttons
+    wrap.querySelectorAll('[data-add]').forEach(btn=>{
+      btn.addEventListener('click', e=>{
+        e.stopPropagation();
+        itinerary.add(Number(btn.dataset.add));
+        updateItin();
+      });
+    });
+  }
+
+  // --- Filters & search ---
+  document.querySelectorAll('.filter-tag').forEach(t=>{
+    t.addEventListener('click', ()=>{
+      document.querySelectorAll('.filter-tag').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      activeCat = t.dataset.cat;
+      renderCards();
+    });
+  });
+  document.getElementById('search-input').addEventListener('input', e=>{
+    searchTerm = e.target.value; renderCards();
+  });
+
+  // --- Essentials strip ---
+  document.getElementById('musts-scroll').innerHTML = musts.map(m=>`
+    <div class="must-card" data-goto="${m.activityId}">
+      <span class="must-emoji">${m.emoji}</span>
+      <span class="must-text">
+        <span class="must-title">${m.title}</span>
+        <span class="must-where">${m.where}</span>
+      </span>
+    </div>`).join('');
+  document.querySelectorAll('[data-goto]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const a = activities.find(x=>x.id==el.dataset.goto);
+      if(!a) return;
+      map.flyTo([a.lat,a.lng], 15, {duration:.6});
+      markers[a.id].openPopup();
+    });
+  });
+
+  // --- Itinerary ---
+  function updateItin(){
+    saveItin();
+    document.getElementById('itin-count').textContent = itinerary.size;
+    const list = document.getElementById('itin-list');
+    if(!itinerary.size){ list.innerHTML = '<div class="itin-empty">Nothing added yet.<br>Tap ＋ Itinerary on any place.</div>'; return; }
+    list.innerHTML = [...itinerary].map(id=>{
+      const a = activities.find(x=>x.id===id);
+      return `<div class="itin-item">
+        <div>
+          <div class="itin-item-name">${a.name}</div>
+          <div class="itin-item-hood">${a.neighborhood} · ${a.duration||''}</div>
+        </div>
+        <button class="itin-remove" data-rm="${id}">✕</button>
+      </div>`;
+    }).join('');
+    list.querySelectorAll('[data-rm]').forEach(b=>{
+      b.addEventListener('click', ()=>{ itinerary.delete(Number(b.dataset.rm)); updateItin(); });
+    });
+  }
+  document.getElementById('itin-fab').addEventListener('click', ()=>document.getElementById('itin-popup').classList.add('open'));
+  document.getElementById('itin-close').addEventListener('click', ()=>document.getElementById('itin-popup').classList.remove('open'));
+  document.getElementById('itin-popup').addEventListener('click', e=>{ if(e.target.id==='itin-popup') e.target.classList.remove('open'); });
+
+  // --- Boot ---
+  renderCards();
+  updateItin();
+  </script>
+</body>
+</html>
