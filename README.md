@@ -1,9 +1,10 @@
+[README.md](https://github.com/user-attachments/files/30511265/README.md)
 # Karachi — A Curated City Guide
 
 An interactive, single-file travel guide to Karachi, focused on **food, cafés, and heritage**.
 33 hand-picked places on a live map, with filters, search, and a personal itinerary builder.
 
-**Live site:** https://&lt;your-username&gt;.github.io/karachi-travel-guide/
+**Live site:** https://malikumarrr.github.io/Karachi-Travel-Guide/
 
 ## Features
 
