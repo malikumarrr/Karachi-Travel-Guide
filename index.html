@@ -51,7 +51,6 @@
 
     /* ─── LAYOUT ───────────────────────────── */
     .main{display:grid;grid-template-columns:390px 1fr;flex:1;min-height:0;}
-    @media(max-width:820px){ .main{grid-template-columns:1fr;} #map{height:55vh;order:-1;} }
 
     /* ─── LEFT PANEL ───────────────────────── */
     .panel{display:flex;flex-direction:column;border-right:1px solid var(--border);min-height:0;background:var(--sand);}
@@ -127,6 +126,18 @@
 
     footer{background:var(--dark);color:rgba(255,255,255,.55);font-size:.68rem;text-align:center;padding:.6rem;flex-shrink:0;}
     footer a{color:var(--gold);text-decoration:none;}
+
+    /* ─── MOBILE: drop the fixed app-shell, let the whole page scroll ─── */
+    /* Placed last so these rules win over the base #map / .cards / .panel rules above */
+    @media(max-width:820px){
+      html,body{height:auto;}
+      body{min-height:100vh;}
+      .main{display:flex;flex-direction:column;flex:none;min-height:0;}
+      .panel{border-right:none;border-bottom:1px solid var(--border);min-height:0;}
+      .panel-controls{position:sticky;top:0;z-index:500;}
+      .cards{overflow-y:visible;flex:none;min-height:0;}
+      #map{height:55vh;width:100%;order:-1;}
+    }
   </style>
 </head>
 <body>
