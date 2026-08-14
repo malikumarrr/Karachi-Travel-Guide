@@ -29,7 +29,9 @@
     .hero-left{display:flex;align-items:baseline;gap:1rem;flex-wrap:wrap;}
     .hero h1{font-family:'Playfair Display',serif;font-size:1.9rem;color:#FAF6EF;letter-spacing:-.02em;}
     .hero-sub{color:var(--gold);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;}
-    .hero-chips{display:flex;gap:.9rem;flex-wrap:wrap;}
+    .hero-right{display:flex;flex-direction:column;align-items:flex-end;gap:.35rem;}
+    .hero-chips{display:flex;gap:.9rem;flex-wrap:wrap;justify-content:flex-end;}
+    .hero-suggest{font-size:.66rem;color:rgba(255,255,255,.55);}
     .hero-chip{color:rgba(255,255,255,.55);font-size:.7rem;display:flex;align-items:center;gap:.3rem;}
 
     /* ─── LEGEND OF MUSTS ──────────────────── */
@@ -71,6 +73,9 @@
     .filter-tag[data-cat="museum"]{color:#1A6B7A;}   .filter-tag[data-cat="museum"].active{background:#1A6B7A;}
     .filter-tag[data-cat="bazaar"]{color:#935116;}   .filter-tag[data-cat="bazaar"].active{background:#935116;}
     .filter-tag[data-cat="beach"]{color:#0E6E8C;}    .filter-tag[data-cat="beach"].active{background:#0E6E8C;}
+    .cuisine-label{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--mid);margin:.55rem 0 .3rem;}
+    .cuisine-row .filter-tag{color:#1A6B7A;}
+    .cuisine-row .filter-tag.active{background:#1A6B7A;}
     .filter-tag[data-cat="park"]{color:#1E6B3C;}     .filter-tag[data-cat="park"].active{background:#1E6B3C;}
 
     .cards{overflow-y:auto;flex:1;min-height:0;padding:.6rem;}
@@ -121,10 +126,10 @@
     .locate-ctrl a{font-size:1.05rem;line-height:26px;text-align:center;text-decoration:none;}
 
     /* ─── ITINERARY BAR + POPUP ────────────── */
-    .itin-fab{position:fixed;right:1rem;bottom:1rem;z-index:1000;background:var(--crimson);color:#fff;
-              border:none;border-radius:30px;padding:.7rem 1.2rem;font-weight:700;font-size:.82rem;
-              cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.25);display:flex;align-items:center;gap:.5rem;}
-    .itin-fab .count{background:#fff;color:var(--crimson);border-radius:12px;padding:.05rem .5rem;font-size:.72rem;}
+    .itin-fab{align-self:baseline;background:var(--crimson);color:#fff;
+              border:none;border-radius:20px;padding:.3rem .8rem;font-weight:700;font-size:.656rem;
+              cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25);display:flex;align-items:center;gap:.35rem;}
+    .itin-fab .count{background:#fff;color:var(--crimson);border-radius:10px;padding:.04rem .4rem;font-size:.576rem;}
     .itin-popup{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1001;display:none;
                 align-items:center;justify-content:center;padding:1rem;}
     .itin-popup.open{display:flex;}
@@ -133,7 +138,28 @@
     .itin-header{background:var(--dark);color:#fff;padding:.9rem 1.1rem;display:flex;justify-content:space-between;align-items:center;}
     .itin-header h2{font-family:'Playfair Display',serif;font-size:1.1rem;}
     .itin-close{background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;line-height:1;}
+    .itin-head-tools{display:flex;align-items:center;gap:.7rem;}
+    .day-count{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.35);
+               border-radius:8px;padding:.3rem .5rem;font-family:'Inter',sans-serif;font-size:.75rem;
+               font-weight:600;cursor:pointer;}
+    .day-count option{color:#000;}
     .itin-list{overflow-y:auto;padding:.8rem;flex:1;}
+    .itin-day-head{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+                   color:var(--crimson);margin:.7rem 0 .4rem;border-bottom:1px solid var(--border);padding-bottom:.25rem;}
+    .itin-day-head:first-child{margin-top:0;}
+    .itin-day-empty{font-size:.72rem;color:var(--mid);font-style:italic;margin-bottom:.4rem;}
+    /* Add-to-which-day chooser */
+    .day-popup{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1002;display:none;
+               align-items:center;justify-content:center;padding:1rem;}
+    .day-popup.open{display:flex;}
+    .day-box{background:#fff;border:2px solid var(--crimson);border-radius:14px;padding:.9rem 1.1rem 1rem;
+             max-width:300px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.3);}
+    .day-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--mid);
+               border-bottom:1px solid var(--border);padding-bottom:.5rem;margin-bottom:.4rem;}
+    .day-list button{display:block;width:100%;text-align:left;background:none;border:none;
+                     padding:.55rem .3rem;font-size:1rem;font-weight:600;color:var(--text);cursor:pointer;
+                     border-radius:8px;font-family:'Inter',sans-serif;}
+    .day-list button:hover{background:var(--off);color:var(--crimson);}
     .itin-item{display:flex;justify-content:space-between;align-items:center;gap:.6rem;
                padding:.55rem;border:1px solid var(--border);border-radius:9px;margin-bottom:.5rem;}
     .itin-item-name{font-weight:600;font-size:.85rem;}
@@ -187,11 +213,15 @@
     <div class="hero-left">
       <h1>Karachi</h1>
       <span class="hero-sub">A Curated City Guide</span>
+      <button class="itin-fab" id="itin-fab">✦ My Itinerary <span class="count" id="itin-count">0</span></button>
     </div>
-    <div class="hero-chips">
-      <span class="hero-chip">🌊 City of Lights</span>
-      <span class="hero-chip">🍢 Street-food capital</span>
-      <span class="hero-chip">🏛 Colonial heritage</span>
+    <div class="hero-right">
+      <div class="hero-chips">
+        <span class="hero-chip">🌊 City of Lights</span>
+        <span class="hero-chip">🍢 Street-food capital</span>
+        <span class="hero-chip">🏛 Colonial heritage</span>
+      </div>
+      <div class="hero-suggest">Suggest <a href="#" class="suggest-link" id="suggest-open">changes</a></div>
     </div>
   </header>
 
@@ -209,6 +239,22 @@
           <button class="filter-tag" data-cat="museum">Museums</button>
           <button class="filter-tag" data-cat="beach">Beach</button>
         </div>
+        <div class="cuisine-label">Cuisine</div>
+        <div class="filter-tags cuisine-row">
+          <button class="filter-tag" data-cat="italian">Italian</button>
+          <button class="filter-tag" data-cat="chinese">Chinese</button>
+          <button class="filter-tag" data-cat="japanese">Japanese</button>
+          <button class="filter-tag" data-cat="thai">Thai</button>
+          <button class="filter-tag" data-cat="korean">Korean</button>
+          <button class="filter-tag" data-cat="mideast">Middle Eastern</button>
+          <button class="filter-tag" data-cat="turkish">Turkish</button>
+          <button class="filter-tag" data-cat="afghan">Afghan</button>
+          <button class="filter-tag" data-cat="mexican">Mexican</button>
+          <button class="filter-tag" data-cat="european">European</button>
+          <button class="filter-tag" data-cat="american">American</button>
+          <button class="filter-tag" data-cat="indian">Indian</button>
+          <button class="filter-tag" data-cat="srilankan">Sri Lankan</button>
+        </div>
       </div>
       <div class="cards" id="cards"><!-- injected by JS --></div>
     </aside>
@@ -218,19 +264,36 @@
   </div>
 
   <footer>
-    Karachi City Guide · Created by Malik Umar · Suggest changes
-    <a href="#" class="suggest-link" id="suggest-open">here</a>
+    Karachi City Guide
   </footer>
 
   <!-- ITINERARY -->
-  <button class="itin-fab" id="itin-fab">✦ My Itinerary <span class="count" id="itin-count">0</span></button>
   <div class="itin-popup" id="itin-popup">
     <div class="itin-box">
       <div class="itin-header">
         <h2>✦ My Karachi Itinerary</h2>
-        <button class="itin-close" id="itin-close">×</button>
+        <div class="itin-head-tools">
+          <select class="day-count" id="day-count" title="How many days is your trip?">
+            <option value="1">1 day</option>
+            <option value="2">2 days</option>
+            <option value="3">3 days</option>
+            <option value="4">4 days</option>
+            <option value="5">5 days</option>
+            <option value="6">6 days</option>
+            <option value="7">7 days</option>
+          </select>
+          <button class="itin-close" id="itin-close">×</button>
+        </div>
       </div>
       <div class="itin-list" id="itin-list"></div>
+    </div>
+  </div>
+
+  <!-- ADD-TO-WHICH-DAY CHOOSER -->
+  <div class="day-popup" id="day-popup">
+    <div class="day-box">
+      <div class="day-title">Add to which day?</div>
+      <div class="day-list" id="day-list"></div>
     </div>
   </div>
 
@@ -339,7 +402,7 @@
      duration:"20 min", price:"Rs", mapsQuery:"Delhi Rabri House Burns Road Karachi"},
 
     {id:9, tier:2, name:"Café Aylanto", neighborhood:"Zamzama, DHA",
-     lat:24.8155, lng:67.0335, category:["food","cafe"], rating:4.2, reviewCount:4531,
+     lat:24.8155, lng:67.0335, category:["food","cafe","european"], rating:4.2, reviewCount:4531,
      description:"A polished Mediterranean-Italian favourite on Zamzama — wood-fired dishes, pastas and a well-loved brunch in an elegant setting.",
      mustOrder:"Chargrilled prawns + tiramisu",
      tip:"Great for a slower, upscale meal. Reserve for weekend brunch.",
@@ -368,7 +431,7 @@
      duration:"1 hr", price:"Rs Rs", mapsQuery:"Butlers Chocolate Cafe 6th Commercial Lane Karachi"},
 
 {id:14, tier:2, name:"Café Flo", neighborhood:"Clifton",
-     lat:24.8130, lng:67.0295, category:["cafe","food"], rating:4.2, reviewCount:3507,
+     lat:24.8130, lng:67.0295, category:["cafe","food","european"], rating:4.2, reviewCount:3507,
      description:"A long-running French bistro and café — quiches, crêpes, steak frites and an unhurried, candle-lit European mood rare in the city.",
      mustOrder:"Crêpe or the steak; a good glass of something",
      tip:"Book ahead for dinner. One of Karachi's most atmospheric sit-downs.",
@@ -466,7 +529,730 @@
      lat:24.7960, lng:66.9820, category:["heritage","beach"], rating:4.4, reviewCount:527,
      description:"A quiet peninsula across the harbour reached by boat from Keamari — a 19th-century lighthouse, an old church and Hindu temple, and empty beaches.",
      tip:"Take a launch from Keamari. Half-day trip; carry water and sun cover.",
-     duration:"Half day", price:"Rs", mapsQuery:"Manora Island Lighthouse Karachi"}
+     duration:"Half day", price:"Rs", mapsQuery:"Manora Island Lighthouse Karachi"},
+
+    // ─────────────── DHA PHASE 8 — food (4.0★+, Google, Aug 2026; commercial-area coords approximate) ───────────────
+    {id:34, tier:2, name:"Kababjees", neighborhood:"Do Darya, DHA Phase 8",
+     lat:24.7902, lng:67.0502, category:["food"], rating:4.4, reviewCount:15500,
+     description:"A Do Darya seafront favourite — a sprawling BBQ, desi, Chinese and seafood menu with sea views; one of the strip's most popular family restaurants.",
+     mustOrder:"BBQ platter + seafood",
+     tip:"Opens evenings (~6pm). Sea-facing tables fill fast on weekends.",
+     duration:"1.5–2 hrs", price:"Rs Rs Rs", mapsQuery:"Kababjees Do Darya Karachi"},
+
+    {id:35, tier:3, name:"Sajjad Restaurant", neighborhood:"Do Darya, DHA Phase 8",
+     lat:24.7889, lng:67.0516, category:["food"], rating:4.1, reviewCount:8365,
+     description:"A long-running Do Darya family restaurant known for flavourful BBQ, karahi and seafood right by the sea.",
+     mustOrder:"Karahi + seafood",
+     tip:"Family-friendly and busy. Beach Avenue side of the strip.",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Sajjad Restaurant Do Darya Karachi"},
+
+    {id:36, tier:3, name:"Charcoal BBQ n Grill", neighborhood:"Do Darya, DHA Phase 8",
+     lat:24.7896, lng:67.0510, category:["food"], rating:4.1, reviewCount:3399,
+     description:"Charcoal-grilled steaks, chops and BBQ platters on the Do Darya seafront — a continental-leaning grill house with sea breeze.",
+     mustOrder:"Charcoal platter + grilled chops",
+     tip:"Evenings only (~5:30pm). Go for the grill, stay for the view.",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Charcoal BBQ n Grill Do Darya Karachi"},
+
+    {id:37, tier:3, name:"Al Habib Restaurant", neighborhood:"Do Darya, DHA Phase 8",
+     lat:24.7884, lng:67.0496, category:["food"], rating:4.2, reviewCount:1201,
+     description:"A relaxed Do Darya seafront spot for Pakistani BBQ and desi mains, with courteous service and open-air sea views.",
+     mustOrder:"BBQ + karahi",
+     tip:"Open late (till ~2am). Good for a late seaside dinner.",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Al Habib Restaurant Do Darya Karachi"},
+
+    {id:38, tier:2, name:"Casa Bistro", neighborhood:"DHA Phase 8",
+     lat:24.8008, lng:67.0642, category:["food","european"], rating:4.5, reviewCount:482,
+     description:"A stylish rooftop bistro in Phase 8 with a well-regarded continental menu and one of the area's best-loved terrace settings.",
+     mustOrder:"Continental mains + dessert",
+     tip:"The rooftop is the draw — go for sunset or evening. Open late.",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Casa Bistro DHA Phase 8 Karachi"},
+
+    {id:39, tier:3, name:"Monarca", neighborhood:"DHA Phase 8",
+     lat:24.7992, lng:67.0632, category:["food","european"], rating:4.6, reviewCount:166,
+     description:"A modern Phase 8 family restaurant serving continental fare in a contemporary setting — one of the commercial area's highest-rated newer spots.",
+     mustOrder:"Continental mains",
+     tip:"Top-floor dining, open very late (~3am).",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Monarca DHA Phase 8 Karachi"},
+
+    {id:40, tier:3, name:"Amigos Inn", neighborhood:"DHA Phase 8",
+     lat:24.7994, lng:67.0634, category:["food"], rating:4.5, reviewCount:25,
+     description:"A cosy Phase 8 café-restaurant with an Asian-leaning menu — small, well-reviewed and open into the early hours.",
+     mustOrder:"Asian mains",
+     tip:"Small spot, few reviews but well-rated. Open very late.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Amigos Inn Cafe DHA Phase 8 Karachi"},
+
+    {id:41, tier:3, name:"Double Dose", neighborhood:"DHA Phase 8",
+     lat:24.7989, lng:67.0628, category:["food"], rating:4.3, reviewCount:282,
+     description:"A casual, budget-friendly Phase 8 eatery popular for fast-food-style plates and late-night bites.",
+     mustOrder:"Signature burgers & plates",
+     tip:"Cheap and cheerful. Open till ~3am.",
+     duration:"45 min", price:"Rs", mapsQuery:"Double Dose DHA Phase 8 Karachi"},
+
+    {id:42, tier:3, name:"Hulu Restaurant", neighborhood:"DHA Phase 8",
+     lat:24.7986, lng:67.0626, category:["food"], rating:4.1, reviewCount:159,
+     description:"A casual restaurant in Phase 8's Al-Murtaza commercial lanes, open till the early hours for late dinners.",
+     mustOrder:"House specialities",
+     tip:"Open till ~3am. Casual local favourite.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Hulu Restaurant Al-Murtaza DHA Phase 8 Karachi"},
+
+    {id:43, tier:3, name:"Creek Walk", neighborhood:"DHA Phase 8",
+     lat:24.7962, lng:67.0688, category:["food"], rating:4.3, reviewCount:1657,
+     description:"A newer waterfront food-street development on the Phase 8 creek — a cluster of casual restaurants and cafés (pizza, burgers, shawarma, chai) popular for its breezy marina-side ambiance.",
+     mustOrder:"Casual bites + Kashmiri chai",
+     tip:"Go in the evening for the waterfront vibe. On the pricier side for what it is.",
+     duration:"1–1.5 hrs", price:"Rs Rs", mapsQuery:"Creek Walk DHA Phase 8 Karachi"},
+
+    {id:44, tier:2, name:"Mara Reserve", neighborhood:"DHA Phase 8",
+     lat:24.7996, lng:67.0642, category:["food"], rating:4.9, reviewCount:241,
+     description:"A highly-rated Phase 8 café-restaurant in the Al-Murtaza commercial area — strong coffee, brunch-style plates and a polished ambiance; among the area's best-reviewed.",
+     mustOrder:"Coffee + brunch plate",
+     tip:"Small and popular — go off-peak. Open late.",
+     duration:"1–1.5 hrs", price:"Rs Rs", mapsQuery:"Mara Reserve DHA Phase 8 Karachi"},
+
+    {id:45, tier:3, name:"Sukhumvit", neighborhood:"DHA Phase 8",
+     lat:24.7984, lng:67.0624, category:["food","thai"], rating:4.7, reviewCount:85,
+     description:"A Phase 8 Thai restaurant on the Al-Murtaza commercial lane — compact, well-reviewed and authentic-leaning.",
+     mustOrder:"Thai curry + pad thai",
+     tip:"Small spot; reserve on weekends.",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Sukhumvit Karachi Al-Murtaza Phase 8"},
+
+    {id:46, tier:3, name:"Laatovita", neighborhood:"DHA Phase 8",
+     lat:24.7990, lng:67.0640, category:["food","italian"], rating:4.1, reviewCount:90,
+     description:"A cosy Phase 8 Italian café-restaurant in the Zulfiqar & Al-Murtaza commercial area — pizza, pasta and good coffee in a warm setting.",
+     mustOrder:"Wood-fired pizza + coffee",
+     tip:"Relaxed, coffee-friendly. Open very late (~4am).",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Laatovita DHA Phase 8 Karachi"},
+
+    {id:47, tier:3, name:"Sapphire Lounge", neighborhood:"DHA Phase 8",
+     lat:24.7997, lng:67.0629, category:["food"], rating:4.5, reviewCount:10,
+     description:"A newer Phase 8 lounge-restaurant in the Zulfiqar commercial area — casual dining with a social, shisha-friendly vibe. (Few reviews so far.)",
+     mustOrder:"Grills + shisha",
+     tip:"New spot; small review base. Evenings are liveliest.",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"The Sapphire Lounge Zulfiqar DHA Phase 8 Karachi"},
+
+    {id:48, tier:3, name:"Prime Bites", neighborhood:"DHA Phase 8",
+     lat:24.7993, lng:67.0637, category:["food"], rating:4.7, reviewCount:10,
+     description:"A small Phase 8 biryani-and-desi spot in the Zulfiqar commercial area — casual and well-rated by early diners. (Few reviews so far.)",
+     mustOrder:"Biryani",
+     tip:"Tiny place, new listing. Good for a quick desi bite.",
+     duration:"45 min", price:"Rs", mapsQuery:"Prime Bites Zulfiqar Commercial DHA Phase 8 Karachi"},
+
+    {id:49, tier:3, name:"Tyso", neighborhood:"DHA Phase 8",
+     lat:24.7985, lng:67.0633, category:["food"], rating:4.0, reviewCount:34,
+     description:"A casual, social-media-buzzed Phase 8 eatery serving burgers and easy plates in the commercial lanes. (Small review base; area worth confirming.)",
+     mustOrder:"Burgers + sides",
+     tip:"Trendy casual spot; verify exact location before going.",
+     duration:"45 min", price:"Rs Rs", mapsQuery:"Tyso restaurant DHA Phase 8 Karachi"},
+
+    // ─────────────── DHA PHASE 7 — food (4.0★+, Google, Aug 2026; coords approximate) ───────────────
+    {id:50, tier:2, name:"Pizza Max (Jami Commercial)", neighborhood:"DHA Phase 7",
+     lat:24.8045, lng:67.0578, category:["food"], rating:4.8, reviewCount:1335,
+     description:"A perennially-busy pizza and fast-food restaurant on Jami Commercial (Khayaban-e-Saadi), open into the early hours — one of Phase 7's most-reviewed spots.",
+     mustOrder:"Signature pizza + fries",
+     tip:"Open very late (~5am on weekends). Gets packed at night.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Pizza Max Jami Commercial Khayaban-e-Saadi Karachi"},
+
+    {id:51, tier:2, name:"Rizwan Kabab House", neighborhood:"DHA Phase 7",
+     lat:24.8058, lng:67.0592, category:["food"], rating:4.2, reviewCount:1521,
+     description:"A busy Phase 7 kabab-and-desi house near Jami Commercial, long popular for cheap, tasty BBQ and grills.",
+     mustOrder:"Seekh kabab + paratha",
+     tip:"No-frills and crowded — go for the food, not the ambiance.",
+     duration:"45 min", price:"Rs", mapsQuery:"Rizwan Kabab House Jami Commercial DHA Phase 7 Karachi"},
+
+    {id:52, tier:2, name:"Qasr-e-Sheereen", neighborhood:"DHA Phase 7",
+     lat:24.8055, lng:67.0575, category:["food"], rating:4.4, reviewCount:1950,
+     description:"A famous Phase 7 sweets and dessert house on Khayaban-e-Jami — barfi, halwa and a dessert buffet (takeaway-focused).",
+     mustOrder:"Assorted mithai + halwa",
+     tip:"Mostly takeaway/delivery — no proper dine-in.",
+     duration:"20 min", price:"Rs", mapsQuery:"Qasr-e-Sheereen Khayaban-e-Jami DHA Karachi"},
+
+    {id:53, tier:3, name:"The Wok Hei", neighborhood:"DHA Phase 7",
+     lat:24.8050, lng:67.0585, category:["food","chinese"], rating:4.6, reviewCount:100,
+     description:"A well-liked Phase 7 pan-Asian restaurant on Jami Commercial — Chinese and Thai-leaning plates at affordable prices.",
+     mustOrder:"Pan-Asian mains",
+     tip:"Good value; small and popular.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"The Wok Hei Jami Commercial DHA Phase 7 Karachi"},
+
+    {id:54, tier:3, name:"Khausey Extreme & Pasta", neighborhood:"DHA Phase 7",
+     lat:24.8052, lng:67.0588, category:["food"], rating:4.6, reviewCount:132,
+     description:"A quirky Phase 7 spot fusing Burmese khow suey with pasta and comfort food on Jami Commercial Street 11.",
+     mustOrder:"Khow suey + a pasta",
+     tip:"Open late (~2am). Fun, casual concept.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Khausey Extreme Pasta Jami Commercial DHA Phase 7 Karachi"},
+
+    {id:55, tier:3, name:"Yum by Amna Cafe", neighborhood:"DHA Phase 7",
+     lat:24.8085, lng:67.0545, category:["cafe","food"], rating:4.1, reviewCount:1048,
+     description:"A popular Phase 7 café-restaurant on Khayaban-e-Sehar serving Western comfort food and desserts in a relaxed setting.",
+     mustOrder:"Western mains + dessert",
+     tip:"Good for a casual sit-down or brunch.",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Yum by Amna Cafe Khayaban-e-Sehar DHA Phase 7 Karachi"},
+
+    {id:56, tier:3, name:"Dosti Ghar", neighborhood:"DHA Phase 7",
+     lat:24.8060, lng:67.0580, category:["cafe","food"], rating:4.0, reviewCount:233,
+     description:"A casual Phase 7 café on Khayaban-e-Jami for chai, rolls, sandwiches and late-night hangouts.",
+     mustOrder:"Chai + a roll",
+     tip:"Relaxed, late-night friendly.",
+     duration:"45 min", price:"Rs", mapsQuery:"Dosti Ghar Khayaban-e-Jami DHA Phase 7 Karachi"},
+
+    {id:57, tier:3, name:"Amna Biryani & Pakwan House", neighborhood:"DHA Phase 7",
+     lat:24.8062, lng:67.0595, category:["food"], rating:4.2, reviewCount:48,
+     description:"A no-frills Phase 7 biryani and pakwan spot for quick, flavourful desi plates.",
+     mustOrder:"Biryani",
+     tip:"Closes fairly early (~9:30pm). Quick bite.",
+     duration:"30 min", price:"Rs", mapsQuery:"Amna Biryani Pakwan House Jami DHA Phase 7 Karachi"},
+
+    {id:58, tier:3, name:"Domino's Pizza (Phase 7)", neighborhood:"DHA Phase 7",
+     lat:24.8048, lng:67.0570, category:["food"], rating:4.7, reviewCount:14,
+     description:"The Phase 7 branch of the pizza chain on Commercial Avenue — reliable delivery and casual dine-in.",
+     mustOrder:"Pizza",
+     tip:"Chain reliability; open very late (~4am).",
+     duration:"45 min", price:"Rs Rs", mapsQuery:"Dominos Pizza Commercial Avenue DHA Phase 7 Karachi"},
+
+    {id:59, tier:3, name:"The Galaxy Restaurant", neighborhood:"DHA Phase 7",
+     lat:24.8053, lng:67.0590, category:["food"], rating:4.2, reviewCount:5,
+     description:"A casual Jami Commercial restaurant in Phase 7 for everyday desi dining. (Small review base.)",
+     mustOrder:"Desi mains",
+     tip:"New/small listing — few reviews so far.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"The Galaxy Restaurant Jami Commercial DHA Phase 7 Karachi"},
+
+    {id:60, tier:3, name:"Cafe Hafiz Jee", neighborhood:"DHA Phase 7",
+     lat:24.8090, lng:67.0548, category:["food"], rating:4.2, reviewCount:5,
+     description:"A small Phase 7 eatery on Khayaban-e-Sehar for casual lunch and desi bites. (Few reviews.)",
+     mustOrder:"Lunch plates",
+     tip:"Closes early (~10pm). Tiny local spot.",
+     duration:"45 min", price:"Rs", mapsQuery:"Cafe Hafiz Jee Khayaban-e-Sehar DHA Phase 7 Karachi"},
+
+    {id:61, tier:3, name:"Dua Fast Food", neighborhood:"DHA Phase 7",
+     lat:24.8088, lng:67.0552, category:["food"], rating:5.0, reviewCount:4,
+     description:"A small family-friendly fast-food spot in Phase 7's Sehar commercial area. (Very few reviews so far.)",
+     mustOrder:"Burgers & fast food",
+     tip:"New listing, tiny review base. Casual quick bite.",
+     duration:"30 min", price:"Rs", mapsQuery:"Dua Fast Food Sehar Commercial DHA Phase 7 Karachi"},
+
+    {id:62, tier:2, name:"The Carnivore", neighborhood:"DHA Phase 6",
+     lat:24.8035, lng:67.0705, category:["food","american"], rating:4.7, reviewCount:4727,
+     description:"A hugely popular Phase 6 steakhouse on Khayaban-e-Shahbaz — steaks, ribs and grills in a lively, meat-forward setting.",
+     mustOrder:"Steak + ribs",
+     tip:"Very busy; go early or expect a wait. No delivery.",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"The Carnivore Khayaban-e-Shahbaz DHA Karachi"},
+
+    {id:63, tier:2, name:"Jardin", neighborhood:"DHA Phase 6",
+     lat:24.81, lng:67.073, category:["food","european"], rating:4.2, reviewCount:2738,
+     description:"An upscale fine-dining restaurant in Phase 6's Ittehad commercial — elegant ambiance and a broad continental menu.",
+     mustOrder:"Chef's specials",
+     tip:"Smart-casual; good for a special dinner. Reserve ahead.",
+     duration:"2 hrs", price:"Rs Rs Rs", mapsQuery:"Jardin Ittehad Commercial DHA Karachi"},
+
+    {id:64, tier:2, name:"Chef's Table Pakistan", neighborhood:"DHA Phase 6",
+     lat:24.807, lng:67.0742, category:["food","european"], rating:4.6, reviewCount:736,
+     description:"A polished Phase 6 restaurant on Khayaban-e-Nishat known for refined plating, ambiance and service.",
+     mustOrder:"Tasting-style mains",
+     tip:"One of the area's nicer sit-downs. Book on weekends.",
+     duration:"2 hrs", price:"Rs Rs Rs", mapsQuery:"Chefs Table Pakistan Khayaban-e-Nishat DHA Karachi"},
+
+    {id:65, tier:3, name:"Lane8", neighborhood:"DHA Phase 6",
+     lat:24.8105, lng:67.0728, category:["food"], rating:4.7, reviewCount:138,
+     description:"A trendy Phase 6 burger joint in the Ittehad commercial area — juicy patties, good sides and a lively late-night vibe.",
+     mustOrder:"Signature burger + fries",
+     tip:"Open till ~2:45am. Small and popular.",
+     duration:"45 min", price:"Rs Rs", mapsQuery:"Lane8 Ittehad Commercial DHA Phase 6 Karachi"},
+
+    {id:66, tier:3, name:"Thick Thighs", neighborhood:"DHA Phase 6",
+     lat:24.8092, lng:67.0762, category:["food"], rating:4.8, reviewCount:69,
+     description:"A Phase 6 burger-and-fried-chicken spot on Khayaban-e-Rahat with generous portions and a cult following.",
+     mustOrder:"Burgers + loaded sides",
+     tip:"Open late (~2:30am). Big portions.",
+     duration:"45 min", price:"Rs Rs", mapsQuery:"Thick Thighs Khayaban-e-Rahat DHA Karachi"},
+
+    {id:67, tier:2, name:"Ginsoy", neighborhood:"DHA Phase 6",
+     lat:24.804, lng:67.0708, category:["food","chinese"], rating:4.3, reviewCount:5152,
+     description:"The Shahbaz flagship of a well-known Pakistani-Chinese chain — big menu, generous portions, reliably busy.",
+     mustOrder:"Chinese platters",
+     tip:"Popular for family dinners. Can get crowded.",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Ginsoy Shahbaz DHA Karachi"},
+
+    {id:68, tier:3, name:"Cafe Sindh", neighborhood:"DHA Phase 6",
+     lat:24.8095, lng:67.0758, category:["food","indian"], rating:4.2, reviewCount:117,
+     description:"A vegetarian-friendly Phase 6 restaurant on Rahat commercial serving Indian and desi vegetarian fare.",
+     mustOrder:"Vegetarian thali",
+     tip:"Good veg options — rarer in the area.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Cafe Sindh Rahat Commercial DHA Karachi"},
+
+    {id:69, tier:3, name:"Domino's Pizza (Ittehad)", neighborhood:"DHA Phase 6",
+     lat:24.8108, lng:67.0735, category:["food"], rating:4.0, reviewCount:1890,
+     description:"The Ittehad-commercial branch of the pizza chain — reliable delivery and casual dine-in, open very late.",
+     mustOrder:"Pizza",
+     tip:"Open till ~4am. Chain consistency.",
+     duration:"45 min", price:"Rs Rs", mapsQuery:"Dominos Pizza Ittehad Commercial DHA Phase 6 Karachi"},
+
+    {id:70, tier:3, name:"Societea", neighborhood:"DHA Phase 6",
+     lat:24.8102, lng:67.0725, category:["cafe","food"], rating:4.5, reviewCount:49,
+     description:"A small, well-liked Phase 6 café-restaurant in the Ittehad lanes with a generous, flavour-forward menu.",
+     mustOrder:"House specials",
+     tip:"Cosy spot; small review base.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Societea Ittehad Commercial DHA Phase 6 Karachi"},
+
+    {id:71, tier:3, name:"Phase 6 Restaurant", neighborhood:"DHA Phase 6",
+     lat:24.8088, lng:67.0685, category:["food"], rating:4.8, reviewCount:21,
+     description:"A 24-hour restaurant on Bukhari Lane 12 — casual all-hours dining. (Small review base.)",
+     mustOrder:"All-day plates",
+     tip:"Open 24 hours. Handy for late nights.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Phase 6 Restaurant Bukhari Lane 12 DHA Karachi"},
+
+    {id:72, tier:3, name:"Braci", neighborhood:"DHA Phase 6",
+     lat:24.8083, lng:67.0678, category:["food","italian"], rating:4.7, reviewCount:30,
+     description:"A newer Phase 6 restaurant on Khayaban-e-Bukhari with an Italian-leaning menu in a smart setting.",
+     mustOrder:"Pasta / grills",
+     tip:"Small and new; well-rated so far.",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Braci Khayaban-e-Bukhari DHA Phase 6 Karachi"},
+
+    {id:73, tier:3, name:"Jani Biryani", neighborhood:"DHA Phase 6",
+     lat:24.809, lng:67.0688, category:["food"], rating:4.6, reviewCount:18,
+     description:"A Bukhari commercial biryani spot in Phase 6 for quick, tasty desi plates. (Few reviews.)",
+     mustOrder:"Biryani",
+     tip:"Takeaway-friendly; closes ~11pm.",
+     duration:"30 min", price:"Rs", mapsQuery:"Jani Biryani Bukhari Commercial DHA Phase 6 Karachi"},
+
+    {id:74, tier:3, name:"Cherie Restaurant", neighborhood:"DHA Phase 6",
+     lat:24.8086, lng:67.0682, category:["food"], rating:4.3, reviewCount:118,
+     description:"A casual Phase 6 Bukhari-area restaurant open late for everyday dining.",
+     mustOrder:"House mains",
+     tip:"Open till ~1am. Casual.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Cherie Restaurant Bukhari DHA Phase 6 Karachi"},
+
+    {id:75, tier:3, name:"Bombay Rasoi", neighborhood:"DHA Phase 6",
+     lat:24.8081, lng:67.0676, category:["food","indian"], rating:4.1, reviewCount:163,
+     description:"A Phase 6 restaurant on Bukhari Lane 5 serving Indian-style curries and desi mains.",
+     mustOrder:"Indian curries",
+     tip:"Open late (~2am).",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Bombay Rasoi Bukhari DHA Phase 6 Karachi"},
+
+    {id:76, tier:2, name:"Hot N Spicy", neighborhood:"DHA Phase 5",
+     lat:24.8028, lng:67.0628, category:["food"], rating:4.1, reviewCount:5880,
+     description:"A long-running Khadda Market institution in Phase 5 — fast food, BBQ and desi favourites, open into the early hours.",
+     mustOrder:"Fast food + BBQ",
+     tip:"Open till ~5am on weekends. Reliable crowd-pleaser.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Hot N Spicy Khadda Market DHA Karachi"},
+
+    {id:77, tier:3, name:"Hanifia", neighborhood:"DHA Phase 5",
+     lat:24.8032, lng:67.0632, category:["food"], rating:4.1, reviewCount:284,
+     description:"A Khadda Market branch of the well-known desi and BBQ eatery — hearty Pakistani plates in Phase 5.",
+     mustOrder:"BBQ + karahi",
+     tip:"Casual, good value.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Hanifia Khadda Market DHA Karachi"},
+
+    {id:78, tier:2, name:"Indus Foods", neighborhood:"DHA Phase 5",
+     lat:24.8024, lng:67.0622, category:["food"], rating:4.0, reviewCount:1643,
+     description:"A budget-friendly Khadda Market restaurant in Phase 5 serving quick desi meals with a loyal following.",
+     mustOrder:"Desi mains",
+     tip:"Cheap and reliable. Open till ~1am.",
+     duration:"45 min", price:"Rs", mapsQuery:"Indus Foods Khadda Market Stadium Lane DHA Karachi"},
+
+    {id:79, tier:3, name:"Shahi Chatkharey", neighborhood:"DHA Phase 5",
+     lat:24.8035, lng:67.0635, category:["food"], rating:4.3, reviewCount:590,
+     description:"A Phase 5 desi spot near Khadda Market famed for economical halwa puri, biryani and pulao.",
+     mustOrder:"Halwa puri + biryani",
+     tip:"Great value; closes ~9:30pm.",
+     duration:"45 min", price:"Rs", mapsQuery:"Shahi Chatkharey Khadda Market DHA Phase 5 Karachi"},
+
+    {id:80, tier:3, name:"Red Apple", neighborhood:"DHA Phase 5",
+     lat:24.8026, lng:67.0624, category:["food"], rating:4.1, reviewCount:2098,
+     description:"A popular Khadda Market restaurant in Phase 5 known for its BBQ and courteous service, open late.",
+     mustOrder:"BBQ items",
+     tip:"Open till ~2am. Good for groups.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Red Apple Khadda Market DHA Phase 5 Karachi"},
+
+    {id:81, tier:3, name:"Janu Biryani", neighborhood:"DHA Phase 5",
+     lat:24.8022, lng:67.062, category:["food"], rating:4.0, reviewCount:2,
+     description:"A tiny Khadda Market biryani shop in Phase 5 for a quick desi plate. (Very few reviews.)",
+     mustOrder:"Biryani",
+     tip:"Small takeaway spot; limited hours.",
+     duration:"20 min", price:"Rs", mapsQuery:"Janu Biryani Khadda Market Stadium Lane DHA Phase 5 Karachi"},
+
+    {id:82, tier:2, name:"Kaybees (Badar)", neighborhood:"DHA Phase 5",
+     lat:24.7986, lng:67.0576, category:["food"], rating:4.0, reviewCount:1321,
+     description:"The Badar-commercial branch of Kaybees in Phase 5 — economical fast food, snacks and desserts in a family setting.",
+     mustOrder:"Snacks + ice cream",
+     tip:"Open till ~2am. Family-friendly.",
+     duration:"45 min", price:"Rs", mapsQuery:"Kaybees Badar Commercial DHA Phase 5 Karachi"},
+
+    {id:83, tier:3, name:"Khatri King Foods", neighborhood:"DHA Phase 5",
+     lat:24.7988, lng:67.0578, category:["food"], rating:4.5, reviewCount:96,
+     description:"A Badar-commercial favourite in Phase 5 famed for crispy samosas and quick snacks.",
+     mustOrder:"Samosas + snacks",
+     tip:"Snack-focused; closes ~8:45pm.",
+     duration:"20 min", price:"Rs Rs", mapsQuery:"Khatri King Foods Badar Commercial DHA Karachi"},
+
+    {id:84, tier:3, name:"Mirchili", neighborhood:"DHA Phase 5",
+     lat:24.7984, lng:67.0574, category:["food","indian"], rating:4.3, reviewCount:723,
+     description:"A Phase 5 Badar-commercial restaurant serving flavour-packed Indian and desi dishes.",
+     mustOrder:"Indian mains",
+     tip:"Fresh, flavourful. Closes ~11pm.",
+     duration:"1 hr", price:"Rs", mapsQuery:"Mirchili Badar Commercial DHA Phase 5 Karachi"},
+
+    {id:85, tier:3, name:"Beit Al Halab", neighborhood:"DHA Phase 5",
+     lat:24.7982, lng:67.0572, category:["food","mideast"], rating:5.0, reviewCount:16,
+     description:"A Badar-commercial Arab restaurant in Phase 5 for Levantine and Middle-Eastern plates. (Few reviews.)",
+     mustOrder:"Levantine platters",
+     tip:"New spot, small review base.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Beit al Halab Badar Commercial DHA Phase 5 Karachi"},
+
+    {id:86, tier:2, name:"Ala Rahi", neighborhood:"DHA Phase 6",
+     lat:24.8042, lng:67.0712, category:["food","afghan"], rating:4.3, reviewCount:5887,
+     description:"A famous DHA restaurant (Phase 6, Shahbaz) for Iranian and Afghan cuisine — mandi, kabuli pulao and grilled meats in a large, popular setting.",
+     mustOrder:"Mandi + kabuli pulao",
+     tip:"Very popular; can get busy. Great for groups.",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Ala Rahi Shahbaz Commercial DHA Karachi"},
+
+    {id:87, tier:2, name:"CNS - Chinese Restaurant", neighborhood:"DHA Phase 5",
+     lat:24.803, lng:67.063, category:["food","chinese"], rating:4.8, reviewCount:776,
+     description:"A highly-rated Phase 5 Chinese restaurant near Khadda Market (Khayaban-e-Shamsheer) — generous portions and a strong local following.",
+     mustOrder:"Chinese platters",
+     tip:"Open late (~2am). Very well-rated.",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"CNS Chinese Restaurant Khayaban-e-Shamsheer DHA Karachi"},
+
+    {id:88, tier:2, name:"Hot N Pepper", neighborhood:"DHA Phase 4",
+     lat:24.8062, lng:67.0662, category:["food"], rating:4.2, reviewCount:1130,
+     description:"A busy Phase 4 barbecue and desi restaurant on the 7th commercial lane — fresh, flavourful grills at economical prices.",
+     mustOrder:"BBQ + karahi",
+     tip:"Casual and popular. Open till ~1am.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Hot N Pepper 7th Commercial DHA Phase 4 Karachi"},
+
+    {id:89, tier:3, name:"KHUDEE Bakery & Cafe", neighborhood:"DHA Phase 4",
+     lat:24.806, lng:67.066, category:["cafe","food","european"], rating:4.6, reviewCount:171,
+     description:"A Phase 4 bakery-café (by KVTC) on Commercial Avenue — pastries, coffee and light meals in a pleasant setting.",
+     mustOrder:"Bakes + coffee",
+     tip:"Nice ambiance; good for a light bite.",
+     duration:"1 hr", price:"Rs Rs Rs", mapsQuery:"KHUDEE Bakery Cafe KVTC DHA Phase 4 Karachi"},
+
+    {id:90, tier:3, name:"Zhongguo Cai", neighborhood:"DHA Phase 4",
+     lat:24.8066, lng:67.0666, category:["food","chinese"], rating:4.4, reviewCount:289,
+     description:"A well-liked Phase 4 Chinese restaurant on the 9th commercial street — tasty food, cool decor and fair prices.",
+     mustOrder:"Chinese mains",
+     tip:"Good value; small and popular.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Zhongguo Cai 9th Commercial DHA Phase 4 Karachi"},
+
+    {id:91, tier:3, name:"Sherry Chaat", neighborhood:"DHA Phase 4",
+     lat:24.8055, lng:67.0655, category:["food"], rating:4.2, reviewCount:643,
+     description:"A popular Phase 4 chaat-and-snacks spot for desi street-food favourites — chaat, gol gappay and loaded burgers.",
+     mustOrder:"Chaat + gol gappay",
+     tip:"Casual street-food vibe. Open till ~12am.",
+     duration:"30 min", price:"Rs", mapsQuery:"Sherry Chaat DHA Phase 4 Commercial Karachi"},
+
+    {id:92, tier:3, name:"Damascus Restaurant", neighborhood:"DHA Phase 4",
+     lat:24.8058, lng:67.0658, category:["food","mideast"], rating:4.1, reviewCount:7,
+     description:"A Phase 4 Arab restaurant near Nisar Shaheed Park serving mandi, shawarma and Levantine plates. (Few reviews.)",
+     mustOrder:"Mandi + shawarma",
+     tip:"New branch; small review base.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Damascus Restaurant Nisar Shaheed DHA Phase 4 Karachi"},
+
+    {id:93, tier:3, name:"Raros", neighborhood:"DHA Phase 4",
+     lat:24.8052, lng:67.0652, category:["food","american"], rating:5.0, reviewCount:5,
+     description:"A new Phase 4 American-style eatery on Commercial Avenue. (Very few reviews so far.)",
+     mustOrder:"American plates",
+     tip:"New listing, tiny review base.",
+     duration:"1 hr", price:"Rs Rs", mapsQuery:"Raros Commercial Avenue DHA Phase 4 Karachi"},
+
+    {id:94, tier:3, name:"Al Faisal Foods", neighborhood:"DHA Phase 4",
+     lat:24.8068, lng:67.0668, category:["food"], rating:5.0, reviewCount:2,
+     description:"A small Phase 4 BBQ spot on the 10th commercial street. (Very few reviews.)",
+     mustOrder:"BBQ",
+     tip:"Tiny local spot; open till ~12:30am.",
+     duration:"45 min", price:"Rs", mapsQuery:"Al Faisal Foods 10th Commercial DHA Phase 4 Karachi"},
+
+    {id:95, tier:3, name:"Pompei Italian", neighborhood:"Clifton",
+     lat:24.841936, lng:67.040842, category:["food","italian"],
+     description:"Italian - a long-standing Italian eatery near the Shapes compound with a loyal following.",
+     mustOrder:"Pasta + wood-fired pizza",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Pompei Italian Restaurant McNeil Road Karachi"},
+
+    {id:96, tier:3, name:"Da Noi", neighborhood:"Clifton (Kehkashan)",
+     lat:24.808327, lng:67.034824, category:["food","italian"],
+     description:"Italian - an intimate Italian restaurant in Kehkashan, open late.",
+     mustOrder:"Pasta + risotto",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Da Noi Kehkashan Clifton Karachi"},
+
+    {id:97, tier:3, name:"terraza", neighborhood:"Clifton",
+     lat:24.809168, lng:67.033531, category:["food","italian"],
+     description:"Italian/European - a stylish Clifton restaurant known for polished food and presentation.",
+     mustOrder:"Pasta + steak",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"terraza F-35 Clifton Karachi"},
+
+    {id:98, tier:3, name:"Bella Pizzeria", neighborhood:"Clifton (Kehkashan)",
+     lat:24.808328, lng:67.035387, category:["food","italian"],
+     description:"Italian - cosy wood-fired Neapolitan pizzeria.",
+     mustOrder:"Wood-fired pizza",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Bella Pizzeria Kehkashan Clifton Karachi"},
+
+    {id:99, tier:3, name:"POMO Neapolitan Pizzeria", neighborhood:"DHA",
+     lat:24.794446, lng:67.049133, category:["food","italian"],
+     description:"Italian - Neapolitan pizzas and pastas.",
+     mustOrder:"Margherita + pasta",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"POMO Neapolitan Pizzeria DHA Karachi"},
+
+    {id:100, tier:3, name:"Pizza Bistro", neighborhood:"DHA Phase 5",
+     lat:24.814333, lng:67.048989, category:["food","italian"],
+     description:"Italian - popular pizza-and-pasta bistro on Khayaban-e-Shamsheer.",
+     mustOrder:"Pizza + pasta",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Pizza Bistro Khayaban-e-Shamsheer DHA Karachi"},
+
+    {id:101, tier:3, name:"Broadway Pizza", neighborhood:"Clifton",
+     lat:24.826325, lng:67.035620, category:["food","italian"],
+     description:"Pizza - 24-hour branch of the popular pizza chain on Khayaban-e-Iqbal.",
+     mustOrder:"Signature pizza",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Broadway Pizza Clifton Khayaban-e-Iqbal Karachi"},
+
+    {id:102, tier:3, name:"Toscano", neighborhood:"DHA Phase 8",
+     lat:24.791406, lng:67.077595, category:["food","italian"],
+     description:"Italian - Italian restaurant in the Zulfiqar commercial area.",
+     mustOrder:"Pasta + pizza",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Toscano Zulfiqar DHA Phase 8 Karachi"},
+
+    {id:103, tier:3, name:"Florentine - Cest La Vie", neighborhood:"DHA Phase 6",
+     lat:24.794200, lng:67.048764, category:["food","italian"],
+     description:"Italian/French - cafe-restaurant on Khayaban-e-Shahbaz.",
+     mustOrder:"Pasta + desserts",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Florentine Cest La Vie Khayaban-e-Shahbaz DHA Karachi"},
+
+    {id:104, tier:3, name:"Rich Food (Sri Lankan)", neighborhood:"DHA Phase 7 Ext",
+     lat:24.818006, lng:67.079144, category:["food","srilankan"],
+     description:"Sri Lankan - the city's authentic Sri Lankan spot: kottu, string hoppers, appam and curries.",
+     mustOrder:"Kottu + string hoppers",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Rich Food Sri Lankan Restaurant DHA Phase 7 Karachi"},
+
+    {id:105, tier:3, name:"Fuchsia Urban Thai", neighborhood:"DHA",
+     lat:24.815794, lng:67.042694, category:["food","thai"],
+     description:"Thai - well-loved Thai restaurant with a leafy courtyard setting.",
+     mustOrder:"Thai curry + pad thai",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Fuchsia Urban Thai DHA Karachi"},
+
+    {id:106, tier:3, name:"Baan Thai", neighborhood:"Clifton",
+     lat:24.824190, lng:67.035572, category:["food","thai"],
+     description:"Thai - long-running authentic Thai restaurant.",
+     mustOrder:"Tom yum + pad thai",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Baan Thai Clifton Karachi"},
+
+    {id:107, tier:3, name:"Crying Tiger", neighborhood:"DHA Phase 6",
+     lat:24.800483, lng:67.068013, category:["food","thai"],
+     description:"Thai - authentic Thai on Khayaban-e-Nishat.",
+     mustOrder:"Thai soup + steamed fish",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Crying Tiger Thai Khayaban-e-Nishat DHA Karachi"},
+
+    {id:108, tier:3, name:"Siam Express", neighborhood:"Clifton",
+     lat:24.834255, lng:67.055393, category:["food","thai"],
+     description:"Thai - authentic Thai (takeaway & delivery only).",
+     mustOrder:"Basil chicken + pad thai",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Siam Express Thai Karachi"},
+
+    {id:109, tier:3, name:"Yum Chinese & Thai", neighborhood:"Clifton",
+     lat:24.802778, lng:67.031630, category:["food","thai"],
+     description:"Thai/Chinese - broad Chinese-and-Thai menu (also at Dolmen Mall).",
+     mustOrder:"Thai + Chinese platters",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Yum Chinese Thai Clifton Karachi"},
+
+    {id:110, tier:3, name:"China Town", neighborhood:"Clifton",
+     lat:24.810983, lng:67.017845, category:["food","chinese"],
+     description:"Chinese - a decades-old Clifton favourite for Chinese food.",
+     mustOrder:"Chinese platters",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"China Town Restaurant Clifton Karachi"},
+
+    {id:111, tier:3, name:"Ginsoy (Clifton Block 8)", neighborhood:"Clifton",
+     lat:24.831074, lng:67.040643, category:["food","chinese"],
+     description:"Chinese - Clifton branch of the popular Pakistani-Chinese chain.",
+     mustOrder:"Chinese platters",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Ginsoy Clifton Block 8 Karachi"},
+
+    {id:112, tier:3, name:"YU by Oriental Table", neighborhood:"Clifton",
+     lat:24.809108, lng:67.032113, category:["food","chinese"],
+     description:"Chinese - modern Chinese dining.",
+     mustOrder:"Oriental mains",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"YU by Oriental Table Clifton Karachi"},
+
+    {id:113, tier:3, name:"Chinese Lanzhou Lamian", neighborhood:"Clifton",
+     lat:24.814538, lng:67.019750, category:["food","chinese"],
+     description:"Chinese - hand-pulled Lanzhou noodles, among the most authentic in the city.",
+     mustOrder:"Lanzhou beef noodles",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Chinese Lanzhou Lamian Clifton Karachi"},
+
+    {id:114, tier:3, name:"Sakura Japanese", neighborhood:"DHA Phase 6",
+     lat:24.795073, lng:67.049072, category:["food","japanese"],
+     description:"Japanese - well-regarded sushi and Japanese cuisine on Khayaban-e-Shahbaz.",
+     mustOrder:"Sushi + ramen",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Sakura Japanese Restaurant Khayaban-e-Shahbaz DHA Karachi"},
+
+    {id:115, tier:3, name:"Jinsoku", neighborhood:"Clifton",
+     lat:24.807526, lng:67.034134, category:["food","japanese"],
+     description:"Japanese - fresh sushi and Japanese plates next to Cafe Flo.",
+     mustOrder:"Sushi platter",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Jinsoku Clifton Karachi"},
+
+    {id:116, tier:3, name:"Yazu", neighborhood:"Clifton",
+     lat:24.807552, lng:67.033346, category:["food","japanese"],
+     description:"Japanese - sushi and Japanese fine dining.",
+     mustOrder:"Sushi + mains",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Yazu Pakistan Clifton Karachi"},
+
+    {id:117, tier:3, name:"Tokyo Sushi Station", neighborhood:"DHA",
+     lat:24.793629, lng:67.048764, category:["food","japanese"],
+     description:"Sushi - dedicated sushi spot near Saba Avenue.",
+     mustOrder:"Sushi rolls",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Tokyo Sushi Station Saba Avenue DHA Karachi"},
+
+    {id:118, tier:3, name:"Nori", neighborhood:"DHA Phase 8",
+     lat:24.787592, lng:67.079566, category:["food","japanese"],
+     description:"Japanese - sushi prepared in front of you, Zulfiqar commercial.",
+     mustOrder:"Fresh sushi",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Nori Zulfiqar DHA Phase 8 Karachi"},
+
+    {id:119, tier:3, name:"TAO - Pan Asian", neighborhood:"DHA Phase 6",
+     lat:24.793075, lng:67.062588, category:["food","japanese"],
+     description:"Pan-Asian/Japanese - sushi and pan-Asian on Khayaban-e-Bukhari.",
+     mustOrder:"Sushi + Asian mains",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"TAO Pan Asian Khayaban-e-Bukhari DHA Karachi"},
+
+    {id:120, tier:3, name:"Dong Bunsik", neighborhood:"DHA (Defence View)",
+     lat:24.838313, lng:67.082063, category:["food","korean"],
+     description:"Korean - casual Korean dining at reasonable prices.",
+     mustOrder:"Bibimbap + tteokbokki",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Dong Bunsik Korean Defence View DHA Karachi"},
+
+    {id:121, tier:3, name:"Banchan", neighborhood:"Clifton",
+     lat:24.816338, lng:67.021218, category:["food","korean"],
+     description:"Korean - Korean BBQ and classics (kimchi, clay pots).",
+     mustOrder:"Korean BBQ + banchan",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Banchan Korean Clifton Karachi"},
+
+    {id:122, tier:3, name:"Raygo", neighborhood:"Clifton",
+     lat:24.791830, lng:67.064573, category:["food","korean"],
+     description:"Korean - quick, satisfying Korean plates.",
+     mustOrder:"Korean bowls",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Raygo Korean Clifton Karachi"},
+
+    {id:123, tier:3, name:"Soul Spice", neighborhood:"Clifton",
+     lat:24.803509, lng:67.031160, category:["food","korean"],
+     description:"Korean - authentic Korean near the seafront.",
+     mustOrder:"Korean mains",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Soul Spice Korean Clifton Karachi"},
+
+    {id:124, tier:3, name:"Mexican Villa", neighborhood:"DHA Phase 5",
+     lat:24.817787, lng:67.041115, category:["food","mexican"],
+     description:"Mexican - Mexican dishes in a themed setting.",
+     mustOrder:"Tacos + fajitas",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Mexican Villa DHA Phase 5 Karachi"},
+
+    {id:125, tier:3, name:"Loco", neighborhood:"DHA",
+     lat:24.818289, lng:67.039443, category:["food","mexican"],
+     description:"Tapas/Mexican - tapas and Latin-leaning small plates.",
+     mustOrder:"Tapas platter",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Loco Tapas DHA Karachi"},
+
+    {id:126, tier:3, name:"Sizzling Shell", neighborhood:"DHA Phase 6",
+     lat:24.800473, lng:67.067889, category:["food","mexican"],
+     description:"Mexican - tacos, burritos and Tex-Mex on Nishat Lane.",
+     mustOrder:"Tacos + burritos",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Sizzling Shell Tacos Nishat DHA Karachi"},
+
+    {id:127, tier:3, name:"Siroc", neighborhood:"Clifton",
+     lat:24.804117, lng:67.032784, category:["food","mideast"],
+     description:"Mediterranean/Arabic - mezze and Mediterranean plates.",
+     mustOrder:"Mezze platter",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Siroc Clifton E Street Karachi"},
+
+    {id:128, tier:3, name:"Ridan House of Mandi", neighborhood:"Clifton",
+     lat:24.878240, lng:67.059596, category:["food","mideast"],
+     description:"Arabic - mandi, madfoon and kunafa; huge following.",
+     mustOrder:"Chicken mandi + kunafa",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Ridan House of Mandi Clifton Karachi"},
+
+    {id:129, tier:3, name:"Al Bait", neighborhood:"Clifton",
+     lat:24.81, lng:67.03, category:["food","mideast"],
+     description:"Lebanese - authentic Lebanese, full of flavour.",
+     mustOrder:"Levantine mezze",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Al Bait Restaurant Clifton Karachi"},
+
+    {id:130, tier:3, name:"Arabian Nights", neighborhood:"Clifton",
+     lat:24.827677, lng:67.034857, category:["food","mideast"],
+     description:"Lebanese/Arabic - Arabic food near Schon Circle, open late.",
+     mustOrder:"Shawarma + grills",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Arabian Nights Schon Circle Clifton Karachi"},
+
+    {id:131, tier:3, name:"Hujra Salarzai", neighborhood:"Boat Basin",
+     lat:24.825765, lng:67.025558, category:["food","mideast"],
+     description:"Middle Eastern - 24-hour Middle-Eastern spot at Boat Basin.",
+     mustOrder:"Mandi + grills",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Hujra Salarzai Boat Basin Karachi"},
+
+    {id:132, tier:3, name:"Balochi Dumpukht", neighborhood:"DHA Phase 8",
+     lat:24.780722, lng:67.056317, category:["food","mideast"],
+     description:"Arab/Balochi - dumpukht and Arab-style slow-cooked meats.",
+     mustOrder:"Dumpukht",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Balochi Dumpukht Cuisine DHA Karachi"},
+
+    {id:133, tier:3, name:"Ruya", neighborhood:"Clifton",
+     lat:24.800391, lng:67.057018, category:["food","turkish"],
+     description:"Turkish - affordable, generous Turkish plates.",
+     mustOrder:"Turkish grills",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Ruya Turkish Clifton Karachi"},
+
+    {id:134, tier:3, name:"Turkish Shawarma Corner", neighborhood:"Clifton",
+     lat:24.816005, lng:67.047368, category:["food","turkish"],
+     description:"Turkish - Turkish-style shawarma and quick bites.",
+     mustOrder:"Turkish shawarma",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Turkish Shawarma Corner D Street Clifton Karachi"},
+
+    {id:135, tier:3, name:"Zeytin", neighborhood:"Shaheed-e-Millat (near DHA)",
+     lat:24.880892, lng:67.062336, category:["food","turkish"],
+     description:"Turkish - the city's best-known authentic Turkish restaurant (just outside DHA).",
+     mustOrder:"Turkish mixed grill",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Zeytin Turkish Shaheed-e-Millat Karachi"},
+
+    {id:136, tier:3, name:"Karahi Addaa", neighborhood:"Clifton",
+     lat:24.820778, lng:67.002954, category:["food","afghan"],
+     description:"Afghan - Afghan kabuli and karahi, open 24 hours.",
+     mustOrder:"Afghani kabuli pulao",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Karahi Addaa Clifton Karachi"},
+
+    {id:137, tier:3, name:"MATAM Bukhari", neighborhood:"DHA",
+     lat:24.788003, lng:67.057935, category:["food","afghan"],
+     description:"Afghani - authentic Afghani boti and grills.",
+     mustOrder:"Afghani boti",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"MATAM Bukhari Afghani DHA Karachi"},
+
+    {id:138, tier:3, name:"Shahi Khyber Shinwari", neighborhood:"Clifton",
+     lat:24.813218, lng:67.005606, category:["food","afghan"],
+     description:"Afghani/Pashtun - Afghani pulao and Shinwari BBQ.",
+     mustOrder:"Afghani pulao + tikka",
+     duration:"1.5 hrs", price:"Rs Rs", mapsQuery:"Shahi Khyber Shinwari BBQ Karachi"},
+
+    {id:140, tier:3, name:"Chapli Kabab House", neighborhood:"Clifton",
+     lat:24.808740, lng:67.038180, category:["food","afghan"],
+     description:"Pashtun - chapli kababs and bhunna qeema.",
+     mustOrder:"Chapli kabab",
+     duration:"1.5 hrs", price:"Rs", mapsQuery:"Chapli Kabab House Clifton Karachi"},
+
+    {id:141, tier:3, name:"Cote Rotie", neighborhood:"Clifton",
+     lat:24.833320, lng:67.036221, category:["food","european"],
+     description:"French - French fine dining at the Alliance Francaise.",
+     mustOrder:"French mains",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Cote Rotie Alliance Francaise Clifton Karachi"},
+
+    {id:142, tier:3, name:"The Deli", neighborhood:"DHA",
+     lat:24.803662, lng:67.032114, category:["food","european"],
+     description:"Western/European - deli-style Western plates (ravioli, cannelloni).",
+     mustOrder:"Ravioli + cannelloni",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"The Deli Clifton Karachi"},
+
+    {id:143, tier:3, name:"Big Tree House", neighborhood:"Clifton (Old Clifton)",
+     lat:24.818019, lng:67.033969, category:["food","european"],
+     description:"Continental - leafy continental garden restaurant on Old Clifton Rd.",
+     mustOrder:"Continental mains",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Big Tree House Old Clifton Karachi"},
+
+    {id:144, tier:3, name:"Angus Steak House", neighborhood:"Zamzama",
+     lat:24.815705, lng:67.042392, category:["food","american"],
+     description:"American/Steak - steakhouse on Zamzama Boulevard.",
+     mustOrder:"Angus steak",
+     duration:"1.5 hrs", price:"Rs Rs Rs", mapsQuery:"Angus Steak House Zamzama Karachi"}
 
   ];
 
@@ -493,19 +1279,24 @@
 
   let map, markers = {}, activeCat = "all", searchTerm = "";
 
-  // --- Itinerary persistence (survives page refresh) ---
-  const ITIN_KEY = 'karachi-guide-itinerary';
-  function loadItin(){
+  // --- Multi-day itinerary plan (survives page refresh) ---
+  // plan maps placeId -> day number; numDays = trip length (1–7)
+  const PLAN_KEY = 'karachi-guide-plan';
+  let numDays = 3;
+  let plan = {};
+  function loadPlan(){
     try{
-      const saved = JSON.parse(localStorage.getItem(ITIN_KEY) || '[]');
-      // keep only ids that still exist in the current data
-      return new Set(saved.filter(id => activities.some(a => a.id === id)));
-    }catch(e){ return new Set(); }
+      const d = JSON.parse(localStorage.getItem(PLAN_KEY) || '{}');
+      numDays = Math.min(7, Math.max(1, d.numDays || 3));
+      plan = {};
+      if(d.plan) for(const k in d.plan){
+        const id = +k, day = +d.plan[k];
+        if(activities.some(a=>a.id===id) && day>=1 && day<=numDays) plan[id]=day;
+      }
+    }catch(e){ numDays=3; plan={}; }
   }
-  function saveItin(){
-    try{ localStorage.setItem(ITIN_KEY, JSON.stringify([...itinerary])); }catch(e){}
-  }
-  const itinerary = loadItin();
+  function savePlan(){ try{ localStorage.setItem(PLAN_KEY, JSON.stringify({numDays, plan})); }catch(e){} }
+  loadPlan();
 
   // --- Map ---
   map = L.map('map', {zoomControl:true}).setView([24.855, 67.02], 12);
@@ -623,12 +1414,13 @@
         markers[a.id].openPopup();
       });
     });
-    // wire add buttons
+    // wire add buttons → pick which day
     wrap.querySelectorAll('[data-add]').forEach(btn=>{
       btn.addEventListener('click', e=>{
         e.stopPropagation();
-        itinerary.add(Number(btn.dataset.add));
-        updateItin();
+        const id = Number(btn.dataset.add);
+        if(numDays===1){ plan[id]=1; updateItin(); }   // only one day → add straight away
+        else openDayChooser(id);
       });
     });
   }
@@ -646,26 +1438,68 @@
     searchTerm = e.target.value; renderCards();
   });
 
-  // --- Itinerary ---
+  // --- Itinerary (grouped by day) ---
   function updateItin(){
-    saveItin();
-    document.getElementById('itin-count').textContent = itinerary.size;
+    savePlan();
+    const ids = Object.keys(plan).map(Number);
+    document.getElementById('itin-count').textContent = ids.length;
     const list = document.getElementById('itin-list');
-    if(!itinerary.size){ list.innerHTML = '<div class="itin-empty">Nothing added yet.<br>Tap ＋ Itinerary on any place.</div>'; return; }
-    list.innerHTML = [...itinerary].map(id=>{
-      const a = activities.find(x=>x.id===id);
-      return `<div class="itin-item">
-        <div>
-          <div class="itin-item-name">${a.name}</div>
-          <div class="itin-item-hood">${a.neighborhood} · ${a.duration||''}</div>
-        </div>
-        <button class="itin-remove" data-rm="${id}">✕</button>
-      </div>`;
-    }).join('');
+    if(!ids.length){
+      list.innerHTML = '<div class="itin-empty">Nothing added yet.<br>Pick your trip length above, then tap ＋ Itinerary on any place and choose a day.</div>';
+      return;
+    }
+    let html='';
+    for(let day=1; day<=numDays; day++){
+      const dayIds = ids.filter(id=>plan[id]===day);
+      html += `<div class="itin-day-head">Day ${day}</div>`;
+      if(!dayIds.length){ html += '<div class="itin-day-empty">No places yet</div>'; continue; }
+      html += dayIds.map(id=>{
+        const a = activities.find(x=>x.id===id);
+        return `<div class="itin-item">
+          <div>
+            <div class="itin-item-name">${a.name}</div>
+            <div class="itin-item-hood">${a.neighborhood} · ${a.duration||''}</div>
+          </div>
+          <button class="itin-remove" data-rm="${id}">✕</button>
+        </div>`;
+      }).join('');
+    }
+    list.innerHTML = html;
     list.querySelectorAll('[data-rm]').forEach(b=>{
-      b.addEventListener('click', ()=>{ itinerary.delete(Number(b.dataset.rm)); updateItin(); });
+      b.addEventListener('click', ()=>{ delete plan[Number(b.dataset.rm)]; updateItin(); });
     });
   }
+
+  // --- "Add to which day?" chooser ---
+  let pendingAdd = null;
+  function openDayChooser(id){
+    pendingAdd = id;
+    const dl = document.getElementById('day-list');
+    let h=''; for(let d=1; d<=numDays; d++){ h += `<button data-day="${d}">Day ${d}</button>`; }
+    dl.innerHTML = h;
+    dl.querySelectorAll('[data-day]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        plan[pendingAdd] = Number(btn.dataset.day);
+        pendingAdd = null;
+        document.getElementById('day-popup').classList.remove('open');
+        updateItin();
+      });
+    });
+    document.getElementById('day-popup').classList.add('open');
+  }
+  document.getElementById('day-popup').addEventListener('click', e=>{
+    if(e.target.id==='day-popup'){ e.target.classList.remove('open'); pendingAdd=null; }
+  });
+
+  // --- Trip-length (Days) selector ---
+  const daySel = document.getElementById('day-count');
+  daySel.value = String(numDays);
+  daySel.addEventListener('change', ()=>{
+    numDays = Number(daySel.value);
+    for(const id in plan){ if(plan[id]>numDays) plan[id]=numDays; }  // pull orphaned places into range
+    updateItin();
+  });
+
   document.getElementById('itin-fab').addEventListener('click', ()=>document.getElementById('itin-popup').classList.add('open'));
   document.getElementById('itin-close').addEventListener('click', ()=>document.getElementById('itin-popup').classList.remove('open'));
   document.getElementById('itin-popup').addEventListener('click', e=>{ if(e.target.id==='itin-popup') e.target.classList.remove('open'); });
