@@ -1,0 +1,1205 @@
+<meta charset="utf-8">
+<title>Compass — Caprae Deal Co-Pilot</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  /* ————— Caprae identity: near-black chrome, gold accent, light working cards ————— */
+  :root{
+    --chrome:#0b0b0c;          /* page ground */
+    --chrome-2:#131316;        /* rail cards */
+    --gold:#f5c542;
+    --gold-deep:#c99a1e;
+    --gold-dim:rgba(245,197,66,.14);
+    --card:#ffffff;
+    --card-ground:#f7f5f0;     /* warm section ground inside cards */
+    --ink:#16130e;
+    --body-ink:#2c2921;
+    --muted:#6f6a60;
+    --faint:#9b958a;
+    --line:#e5e1d6;
+    --hair:#efece4;
+    --on-dark:#ece7dc;
+    --on-dark-muted:#a8a294;
+    --good:#1e7a3c; --good-bg:#e9f4ec;
+    --warn:#996a00; --warn-bg:#fdf3d8;
+    --bad:#b23324;  --bad-bg:#fcebe8;
+    --yellow:#fff6cc; --yellow-line:#e2cc74; --blue-in:#2b2bd6;
+    --serif:Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --shadow:0 1px 2px rgba(0,0,0,.25),0 12px 32px rgba(0,0,0,.35);
+    color-scheme:light;
+  }
+  /* Committed single visual world (Caprae's dark chrome) — deliberate, not an omission. */
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--chrome);color:var(--on-dark);font-family:var(--sans);
+    font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;
+    padding:clamp(14px,3.5vw,40px)}
+  .wrap{max-width:1120px;margin:0 auto}
+
+  /* ————— Header ————— */
+  header.hd{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;
+    gap:14px;border-bottom:2px solid var(--gold);padding-bottom:18px;margin-bottom:6px}
+  .brand .eyebrow{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--gold);font-weight:700;margin:0 0 .4rem}
+  .brand h1{font-family:var(--serif);font-size:clamp(2rem,5vw,3rem);line-height:1;
+    margin:0;color:#fff;letter-spacing:.01em;text-wrap:balance}
+  .brand h1 .nee{color:var(--gold)}
+  .brand .sub{margin:.55rem 0 0;color:var(--on-dark-muted);font-size:.95rem;max-width:60ch}
+  .brand .sub b{color:var(--on-dark)}
+  .motto{font-family:var(--serif);font-style:italic;color:var(--gold);font-size:1.05rem;
+    white-space:nowrap;padding-bottom:.2rem}
+
+  /* ————— Tabs ————— */
+  nav.tabs{display:flex;gap:4px;margin:18px 0 22px}
+  nav.tabs button{font-family:var(--sans);font-size:.86rem;font-weight:700;cursor:pointer;
+    background:transparent;color:var(--on-dark-muted);border:1px solid transparent;
+    border-bottom:2px solid transparent;padding:10px 16px;border-radius:6px 6px 0 0;letter-spacing:.02em}
+  nav.tabs button[aria-selected="true"]{color:var(--gold);border-color:#26262b;border-bottom-color:var(--gold);background:#101013}
+  nav.tabs button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .pane{display:none}
+  .pane.on{display:block}
+
+  /* ————— Tab 1 layout ————— */
+  .board{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
+  @media (max-width:900px){.board{grid-template-columns:1fr}}
+
+  /* Call-sheet cards */
+  .sheet{display:flex;flex-direction:column;gap:14px;min-width:0}
+  .qcard{background:var(--card);border-radius:8px;box-shadow:var(--shadow);padding:16px 18px 14px;color:var(--body-ink)}
+  .qcard h3{font-family:var(--sans);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--gold-deep);font-weight:800;margin:0 0 2px}
+  .qcard .q{font-family:var(--serif);font-size:1.06rem;color:var(--ink);margin:0 0 10px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-family:var(--sans);font-size:.86rem;font-weight:600;cursor:pointer;
+    background:var(--card-ground);color:var(--body-ink);border:1px solid var(--line);
+    border-radius:999px;padding:8px 14px;transition:background .12s,border-color .12s}
+  .chip:hover{border-color:var(--gold-deep)}
+  .chip:focus-visible{outline:2px solid var(--gold-deep);outline-offset:1px}
+  .chip.sel{background:var(--ink);border-color:var(--ink);color:var(--gold)}
+  .qcard .opt{font-size:.72rem;color:var(--faint);font-weight:600;letter-spacing:.02em;text-transform:none;margin-left:.4rem}
+
+  /* Numbers card */
+  .numgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .fld label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 4px}
+  .fld .inwrap{display:flex;align-items:center;gap:6px}
+  .fld .pre,.fld .post{font-size:.85rem;color:var(--muted)}
+  input[type=number]{width:100%;text-align:right;font-size:.95rem;font-variant-numeric:tabular-nums;
+    color:var(--blue-in);font-weight:700;background:var(--yellow);border:1px solid var(--yellow-line);
+    border-radius:4px;padding:8px 9px;-moz-appearance:textfield;font-family:var(--sans)}
+  input[type=number]:focus{outline:2px solid var(--gold-deep);outline-offset:1px}
+  input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+  /* ————— Co-pilot rail ————— */
+  .rail{position:sticky;top:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+  @media (max-width:900px){.rail{position:static}}
+  .rail-hd{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .rail-hd .t{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);font-weight:800}
+  .rail-hd .n{font-size:.72rem;color:var(--on-dark-muted)}
+  .anchor-strip{background:var(--gold-dim);border:1px solid var(--gold-deep);border-radius:8px;
+    padding:12px 14px;color:var(--on-dark)}
+  .anchor-strip .k{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:800;margin:0 0 2px}
+  .anchor-strip .v{font-family:var(--serif);font-size:1.7rem;color:#fff;font-variant-numeric:tabular-nums;line-height:1.1}
+  .anchor-strip .m{font-size:.78rem;color:var(--on-dark-muted);margin-top:2px}
+  .ccard{background:var(--chrome-2);border:1px solid #232329;border-left:3px solid var(--gold);
+    border-radius:8px;padding:14px 16px;color:var(--on-dark)}
+  .ccard.guard{border-left-color:var(--bad)}
+  .ccard.flag{border-left-color:var(--warn)}
+  .ccard .tag{display:inline-block;font-size:.66rem;font-weight:800;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--gold);margin:0 0 6px}
+  .ccard.guard .tag{color:#ff8b7d}
+  .ccard.flag .tag{color:#eeb64f}
+  .ccard .say{font-family:var(--serif);font-size:1rem;line-height:1.45;color:#fff;margin:0 0 6px}
+  .ccard .why{font-size:.8rem;color:var(--on-dark-muted);margin:0}
+  .ccard .why b{color:var(--on-dark)}
+  .ccard .moreways{margin:2px 0 8px}
+  .ccard .moreways summary{cursor:pointer;font-size:.72rem;color:var(--gold);font-weight:700;
+    letter-spacing:.04em;list-style:none;padding:2px 0}
+  .ccard .moreways summary::-webkit-details-marker{display:none}
+  .ccard .moreways summary::before{content:"\002B  ";font-weight:800}
+  .ccard .moreways[open] summary::before{content:"\2212  "}
+  .ccard .moreways ul{margin:6px 0 0;padding-left:15px}
+  .ccard .moreways li{font-family:var(--serif);color:#f1ede3;font-size:.92rem;line-height:1.4;margin:5px 0}
+  .ccard .tacts{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+  .ccard .tact{font-size:.6rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-deep);border-radius:999px;padding:3px 8px}
+  .ccard .tacthow{font-size:.75rem;color:var(--on-dark-muted);margin:7px 0 0;font-style:italic;line-height:1.45}
+  .ccard .tacthow b{font-style:normal;color:var(--on-dark)}
+  .rail-empty{border:1px dashed #2c2c33;border-radius:8px;padding:16px;color:var(--on-dark-muted);font-size:.85rem}
+
+  /* ————— Ledger ————— */
+  .ledger{margin-top:22px;background:var(--card);border-radius:8px;box-shadow:var(--shadow);
+    color:var(--body-ink);overflow:hidden}
+  .ledger .band{background:var(--ink);color:#fff;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .ledger .band h2{font-family:var(--serif);font-size:1.15rem;margin:0;font-weight:600}
+  .temp{display:flex;align-items:center;gap:10px}
+  .temp .bar{width:130px;height:8px;border-radius:4px;background:#3a3a3a;overflow:hidden}
+  .temp .fill{height:100%;background:var(--gold);transition:width .3s}
+  .temp .lab{font-size:.78rem;font-weight:700;letter-spacing:.06em;color:var(--gold)}
+  .ledger .inner{padding:16px 20px 18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+  @media (max-width:760px){.ledger .inner{grid-template-columns:1fr}}
+  .facts{font-size:.85rem}
+  .facts h4,.brief h4{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep);font-weight:800;margin:0 0 8px}
+  .facts table{width:100%;border-collapse:collapse}
+  .facts td{padding:5px 0;border-bottom:1px solid var(--hair);vertical-align:top}
+  .facts td:first-child{color:var(--muted);width:42%}
+  .facts td:last-child{font-weight:600;color:var(--ink)}
+  .brief p{margin:0 0 10px;font-size:.92rem;line-height:1.6}
+  .rowbox{grid-column:1 / -1;background:var(--card-ground);border:1px solid var(--line);border-radius:6px;padding:12px 14px}
+  .rowbox .k{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800;margin:0 0 6px}
+  .rowbox code{display:block;font-size:.78rem;color:var(--body-ink);word-break:break-all;
+    font-family:ui-monospace,Consolas,monospace;margin:0 0 10px;background:#fff;border:1px solid var(--hair);border-radius:4px;padding:8px 10px;overflow-x:auto}
+  .rowbox .cap{font-size:.78rem;color:var(--muted);font-style:italic}
+  button.gold{font-family:var(--sans);font-size:.84rem;font-weight:800;cursor:pointer;
+    background:var(--gold);color:#16130e;border:1px solid var(--gold-deep);padding:9px 16px;border-radius:5px}
+  button.gold:hover{background:#ffd35c}
+  button.gold:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  button.ghost{font-family:var(--sans);font-size:.8rem;font-weight:700;cursor:pointer;
+    background:transparent;color:var(--muted);border:1px solid var(--line);padding:8px 14px;border-radius:5px}
+  button.ghost:hover{border-color:var(--muted)}
+
+  /* ————— details / legend / footer ————— */
+  details.note{margin:22px 0 4px;border-top:2px solid var(--gold);background:transparent;color:var(--on-dark)}
+  details.note summary{cursor:pointer;padding:13px 2px;font-family:var(--serif);font-size:1.02rem;
+    color:#fff;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  details.note summary::-webkit-details-marker{display:none}
+  details.note summary::after{content:"\25BE";color:var(--on-dark-muted);font-size:.8rem;transition:transform .2s}
+  details.note[open] summary::after{transform:rotate(180deg)}
+  details.note .body{padding:0 2px 16px;font-size:.88rem;color:var(--on-dark-muted);line-height:1.7;max-width:78ch}
+  details.note .body p{margin:.5rem 0}
+  details.note .body b{color:var(--on-dark)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:.76rem;color:var(--on-dark-muted);margin:14px 2px 0}
+  .sw{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-1px;margin-right:5px;border:1px solid #333}
+  .sw.g{background:var(--gold)} .sw.r{background:var(--bad)} .sw.w{background:var(--warn)} .sw.y{background:var(--yellow);border-color:var(--yellow-line)}
+  footer{margin:26px 2px 6px;font-size:.78rem;color:var(--on-dark-muted);line-height:1.6;
+    border-top:1px solid #232329;padding-top:14px;max-width:90ch}
+
+  /* ————— Tab 2 (assessment worksheet — light cards, BCR row grammar) ————— */
+  .sheet2{display:flex;flex-direction:column;gap:16px}
+  .wcard{background:var(--card);border-radius:8px;box-shadow:var(--shadow);overflow:hidden;color:var(--body-ink)}
+  .wcard .band{background:var(--ink);color:#fff;padding:12px 20px;display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .wcard .band h2{font-family:var(--serif);font-weight:600;font-size:1.12rem;margin:0}
+  .wcard .band .ref{font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:700}
+  .wcard .sect{padding:6px 20px 14px}
+  .wcard .hint{font-size:.83rem;color:var(--muted);margin:10px 0 4px}
+  .row{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:14px;align-items:center;padding:8px 0;border-bottom:1px solid var(--hair)}
+  .row:last-child{border-bottom:0}
+  .row label{font-size:.9rem;color:var(--body-ink)}
+  .fldr{display:flex;align-items:center;justify-content:flex-end;gap:6px}
+  .fldr .pre,.fldr .post{font-size:.82rem;color:var(--muted)}
+  .computed{display:flex;align-items:center;justify-content:flex-end;font-variant-numeric:tabular-nums;
+    font-weight:700;color:#38434d;font-size:.95rem;padding:8px 9px;border:1px dashed var(--line);border-radius:4px;width:100%}
+  .out-row{background:linear-gradient(90deg,var(--gold-dim),rgba(245,197,66,0))}
+  .out-row label{font-weight:700;color:var(--ink)}
+  .out-row .val{font-family:var(--serif);font-weight:600;font-size:1.18rem;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+  .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:0 0 16px}
+  @media (max-width:640px){.tiles{grid-template-columns:1fr}}
+  .tile{background:var(--card);border-radius:8px;box-shadow:var(--shadow);border-top:3px solid var(--ink);padding:14px 16px;color:var(--body-ink)}
+  .tile.key{border-top-color:var(--gold)}
+  .tile .k{font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800;margin:0 0 6px}
+  .tile .v{font-family:var(--serif);font-weight:600;font-size:clamp(1.5rem,4vw,2rem);color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.05}
+  .tile .c{font-size:.72rem;color:var(--faint);margin-top:6px}
+  .flags{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;padding:4px 0 8px}
+  .flg{border-radius:6px;padding:11px 13px;font-size:.82rem;border:1px solid var(--line)}
+  .flg .t{font-weight:800;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;margin:0 0 4px;display:flex;align-items:center;gap:6px}
+  .flg .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .flg.good{background:var(--good-bg)} .flg.good .t{color:var(--good)} .flg.good .dot{background:var(--good)}
+  .flg.warn{background:var(--warn-bg)} .flg.warn .t{color:var(--warn)} .flg.warn .dot{background:var(--warn)}
+  .flg.bad{background:var(--bad-bg)}  .flg.bad .t{color:var(--bad)}  .flg.bad .dot{background:var(--bad)}
+  .flg .d{color:var(--body-ink);margin:0}
+  .tbl-scroll{overflow-x:auto}
+  table.sc{width:100%;border-collapse:collapse;font-size:.88rem;min-width:520px}
+  table.sc th{background:var(--ink);color:#fff;text-align:left;font-size:.7rem;letter-spacing:.08em;
+    text-transform:uppercase;padding:9px 12px;font-weight:700}
+  table.sc th:not(:first-child),table.sc td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}
+  table.sc td{padding:9px 12px;border-bottom:1px solid var(--hair);color:var(--body-ink)}
+  table.sc td.fx{font-weight:700;color:var(--ink)}
+  table.sc tr.hl td{background:var(--gold-dim);font-weight:700;color:var(--ink)}
+  table.sc td .mini{width:76px;display:inline-block}
+  .story{font-size:.83rem;color:var(--muted);font-style:italic;margin:8px 0 2px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+
+  <header class="hd">
+    <div class="brand">
+      <p class="eyebrow">Caprae Capital &middot; Deal Desk &middot; Unsolicited prototype</p>
+      <h1>COMPASS<span class="nee">.</span></h1>
+      <p class="sub">A live cold-call co-pilot. Tap what the seller says — Compass returns the next question,
+        the play, and the guardrail, and prices the deal the moment numbers land.
+        Built by <b>Malik Umar</b> from Caprae&rsquo;s own training playbook.</p>
+    </div>
+    <div class="motto">&ldquo;Prompts, not scripts.&rdquo;</div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" id="tabbtn1" onclick="showTab(1)">&#9312;&nbsp; Compass — Live Call</button>
+    <button role="tab" aria-selected="false" id="tabbtn2" onclick="showTab(2)">&#9313;&nbsp; Seller-Ready Assessment</button>
+  </nav>
+
+  <!-- ══════════════════════ TAB 1 ══════════════════════ -->
+  <section class="pane on" id="pane1">
+    <div class="board">
+
+      <!-- Zone A : call sheet -->
+      <div class="sheet">
+
+        <div class="qcard">
+          <h3>1 &middot; Who answered?</h3>
+          <p class="q">Who&rsquo;s on the line?</p>
+          <div class="chips" id="g-who">
+            <button class="chip" data-v="owner">Owner</button>
+            <button class="chip" data-v="partner">Partner / family member</button>
+            <button class="chip" data-v="gatekeeper">Gatekeeper</button>
+          </div>
+        </div>
+
+        <div class="qcard">
+          <h3>2 &middot; Tenure</h3>
+          <p class="q">How long have they run the business?</p>
+          <div class="chips" id="g-tenure">
+            <button class="chip" data-v="short">Under 10 yrs</button>
+            <button class="chip" data-v="mid">10&ndash;25 yrs</button>
+            <button class="chip" data-v="long">25+ yrs</button>
+          </div>
+        </div>
+
+        <div class="qcard">
+          <h3>3 &middot; Succession</h3>
+          <p class="q">Is there a next generation in the picture?</p>
+          <div class="chips" id="g-succ">
+            <button class="chip" data-v="kidsYes">Kids interested</button>
+            <button class="chip" data-v="kidsNo">Kids not interested</button>
+            <button class="chip" data-v="noKids">No kids</button>
+            <button class="chip" data-v="hasPartner">Has a partner</button>
+          </div>
+        </div>
+
+        <div class="qcard">
+          <h3>4 &middot; Signals <span class="opt">tap all that you hear</span></h3>
+          <p class="q">What is the seller telling you?</p>
+          <div class="chips" id="g-sig">
+            <button class="chip" data-v="wantsOut">Wants out</button>
+            <button class="chip" data-v="wantsStay">Wants to stay involved</button>
+            <button class="chip" data-v="noNeed">&ldquo;I don&rsquo;t need you&rdquo;</button>
+            <button class="chip" data-v="burned">Burned by a buyer before</button>
+            <button class="chip" data-v="lowballed">&ldquo;They lowballed me&rdquo;</button>
+            <button class="chip" data-v="family">Family business</button>
+          </div>
+        </div>
+
+        <div class="qcard">
+          <h3>5 &middot; Numbers <span class="opt">the only typing on this page</span></h3>
+          <p class="q">As soon as the seller shares figures, Anchor prices the deal.</p>
+          <div class="numgrid">
+            <div class="fld"><label for="n-rev">Revenue</label>
+              <div class="inwrap"><span class="pre">$</span><input type="number" id="n-rev" step="0.1" min="0" placeholder="12.0"><span class="post">M</span></div></div>
+            <div class="fld"><label for="n-th">Owner take-home</label>
+              <div class="inwrap"><span class="pre">$</span><input type="number" id="n-th" step="0.1" min="0" placeholder="2.0"><span class="post">M</span></div></div>
+            <div class="fld"><label for="n-ndr">NDR <span style="text-transform:none">(optional)</span></label>
+              <div class="inwrap"><input type="number" id="n-ndr" step="1" min="0" placeholder="110"><span class="post">%</span></div></div>
+            <div class="fld"><label for="n-conc">Top-customer share <span style="text-transform:none">(optional)</span></label>
+              <div class="inwrap"><input type="number" id="n-conc" step="1" min="0" placeholder="15"><span class="post">%</span></div></div>
+          </div>
+          <div class="chips" id="g-ind" style="margin-top:12px">
+            <button class="chip" data-v="services">Services</button>
+            <button class="chip" data-v="software">Software / SaaS</button>
+            <button class="chip" data-v="other">Other</button>
+          </div>
+        </div>
+
+        <div class="qcard">
+          <h3>6 &middot; Preference</h3>
+          <p class="q">What does the seller optimise for?</p>
+          <div class="chips" id="g-pref">
+            <button class="chip" data-v="cashNow">Cash now</button>
+            <button class="chip" data-v="stayInvolved">Stay involved</button>
+            <button class="chip" data-v="maxPrice">Max price</button>
+            <button class="chip" data-v="legacy">Legacy / right home</button>
+          </div>
+        </div>
+
+        <div class="qcard">
+          <h3>7 &middot; Stay horizon <span class="opt">if staying on</span></h3>
+          <p class="q">How long do they want to keep operating?</p>
+          <div class="chips" id="g-hor">
+            <button class="chip" data-v="short">1&ndash;2 yrs</button>
+            <button class="chip" data-v="long">3&ndash;5 yrs</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Zone B : co-pilot rail -->
+      <aside class="rail" aria-live="polite">
+        <div class="rail-hd"><span class="t">Co-pilot</span><span class="n" id="rail-count">listening&hellip;</span></div>
+        <div class="anchor-strip" id="anchor-strip" hidden>
+          <p class="k">&#9875; Anchor &middot; indicative, pre-NDA</p>
+          <div class="v" id="anchor-range">—</div>
+          <p class="m" id="anchor-note"></p>
+        </div>
+        <div id="cards"></div>
+      </aside>
+    </div>
+
+    <!-- Zone C : ledger -->
+    <div class="ledger" id="ledger" hidden>
+      <div class="band">
+        <h2>Call Ledger</h2>
+        <div class="temp">
+          <span class="lab" id="temp-lab">WARM &middot; 50</span>
+          <div class="bar"><div class="fill" id="temp-fill" style="width:50%"></div></div>
+        </div>
+      </div>
+      <div class="inner">
+        <div class="facts">
+          <h4>Captured on this call</h4>
+          <table id="facts-tbl"></table>
+        </div>
+        <div class="brief">
+          <h4>Auto-summary</h4>
+          <div id="brief-txt"></div>
+        </div>
+        <div class="rowbox">
+          <p class="k">Database row — every call becomes a comp</p>
+          <code id="row-txt"></code>
+          <button class="gold" id="copy-row" type="button">Copy database row</button>
+          <button class="ghost" id="reset-call" type="button" style="margin-left:8px">Reset call</button>
+          <p class="cap" style="margin-top:10px">Every call becomes a row — this is how the private-comps database gets built.
+            Caprae&rsquo;s own words: <i>&ldquo;we would love to have our own database.&rdquo;</i></p>
+        </div>
+      </div>
+    </div>
+
+    <details class="note">
+      <summary>The logic behind Compass</summary>
+      <div class="body">
+        <p>Every rule in this prototype is lifted from Caprae&rsquo;s own training sessions — none of it is invented:</p>
+        <p><b>The multiples cheat-sheet.</b> Under $1M in owner earnings &rarr; 3&ndash;5&times;. $1&ndash;5M &rarr; 4&ndash;8&times;.
+          Above $5M &rarr; 6&ndash;10&times;. Software &rarr; 3&ndash;6&times; ARR. Premiums when net dollar retention clears 110%
+          and no customer exceeds ~15% of revenue.</p>
+        <p><b>The plays.</b> The &ldquo;I don&rsquo;t need you&rdquo; flip (war chest, buy out your competitors),
+          the succession conversation (&ldquo;tell me about your son&rdquo; — never a yes/no), the co-founder-you-never-had
+          framing, the time-to-close pain for sellers burned by slow buyers.</p>
+        <p><b>The guardrails.</b> Never open with a yes/no question. Never say &ldquo;incubator&rdquo; — say
+          &ldquo;sponsored search.&rdquo; Never say &ldquo;round robin&rdquo; or &ldquo;right of first refusal&rdquo; on a call.
+          Never cite the owner&rsquo;s age — cite their tenure.</p>
+        <p><b>Why prompts, not scripts.</b> The most repeated critique in Caprae&rsquo;s own call reviews is
+          <i>sounding scripted</i>. Compass therefore surfaces cues and options — it never writes the caller&rsquo;s lines
+          for them. It surfaces up to three cues at once — each with a few ways to say it and the
+          named tactic behind it — so the caller has options without being buried.</p>
+        <p><b>Boundaries.</b> Everything here is an indicative, pre-NDA anchoring aid. It never replaces the real path:
+          mutual NDA &rarr; three years of financials &rarr; data room &rarr; a proper assessment.</p>
+      </div>
+    </details>
+
+    <div class="legend">
+      <span><span class="sw g"></span>Play / next move</span>
+      <span><span class="sw r"></span>Guardrail — don&rsquo;t say this</span>
+      <span><span class="sw w"></span>Conflict flag</span>
+      <span><span class="sw y"></span>Yellow = the caller types this</span>
+    </div>
+  </section>
+
+  <!-- ══════════════════════ TAB 2 ══════════════════════ -->
+  <section class="pane" id="pane2">
+
+    <div class="tiles" aria-live="polite">
+      <div class="tile"><p class="k">Adjusted EBITDA</p><div class="v" id="t-adj">$2.60M</div><p class="c">after normalisation — Panel A</p></div>
+      <div class="tile key"><p class="k">Indicative range</p><div class="v" id="t-range">$10.4M&ndash;$20.8M</div><p class="c" id="t-mult">4&ndash;8&times; adjusted EBITDA</p></div>
+      <div class="tile"><p class="k">Fixes on the table</p><div class="v" id="t-fix">+$3.25M</div><p class="c">value of closing the gaps — Panel C</p></div>
+    </div>
+
+    <div class="sheet2">
+
+      <!-- Panel A -->
+      <div class="wcard">
+        <div class="band"><h2>A &middot; Normalised EBITDA bridge</h2><span class="ref">what the business really earns</span></div>
+        <div class="sect">
+          <p class="hint">Worked example — <b>Midwest Widget Services Co.</b> (fictional). Overwrite any yellow cell; everything recomputes.</p>
+          <div class="row"><label>Revenue (TTM)</label>
+            <div class="fldr"><span class="pre">$</span><input type="number" id="a-rev" step="0.1" value="12.0"><span class="post">M</span></div></div>
+          <div class="row"><label>Reported EBITDA</label>
+            <div class="fldr"><span class="pre">$</span><input type="number" id="a-ebitda" step="0.05" value="2.10"><span class="post">M</span></div></div>
+          <div class="row"><label>Owner&rsquo;s current compensation</label>
+            <div class="fldr"><span class="pre">$</span><input type="number" id="a-osal" step="0.05" value="0.45"><span class="post">M</span></div></div>
+          <div class="row"><label>Market cost of a replacement GM</label>
+            <div class="fldr"><span class="pre">$</span><input type="number" id="a-msal" step="0.05" value="0.15"><span class="post">M</span></div></div>
+          <div class="row"><label>One-time items (legal settlement, moving costs)</label>
+            <div class="fldr"><span class="pre">$</span><input type="number" id="a-oneoff" step="0.01" value="0.12"><span class="post">M</span></div></div>
+          <div class="row"><label>Rent paid to owner&rsquo;s own LLC</label>
+            <div class="fldr"><span class="pre">$</span><input type="number" id="a-rentp" step="0.01" value="0.30"><span class="post">M</span></div></div>
+          <div class="row"><label>Market rent for the same premises</label>
+            <div class="fldr"><span class="pre">$</span><input type="number" id="a-rentm" step="0.01" value="0.22"><span class="post">M</span></div></div>
+          <div class="row"><label>Owner-salary add-back <span style="color:var(--muted)">— computed</span></label>
+            <div class="computed" id="a-c1">+ $0.30M</div></div>
+          <div class="row"><label>Rent normalisation <span style="color:var(--muted)">— computed</span></label>
+            <div class="computed" id="a-c2">+ $0.08M</div></div>
+          <div class="row out-row"><label>Adjusted EBITDA</label><div class="val" id="a-out">$2.60M</div></div>
+        </div>
+      </div>
+
+      <!-- Panel B -->
+      <div class="wcard">
+        <div class="band"><h2>B &middot; Quality-of-earnings screen</h2><span class="ref">find the flaw before the buyer does</span></div>
+        <div class="sect">
+          <div class="row"><label>Days sales outstanding — current year</label>
+            <div class="fldr"><input type="number" id="b-dso1" step="1" value="58"><span class="post">days</span></div></div>
+          <div class="row"><label>Days sales outstanding — prior year</label>
+            <div class="fldr"><input type="number" id="b-dso0" step="1" value="41"><span class="post">days</span></div></div>
+          <div class="row"><label>Top customer, share of revenue</label>
+            <div class="fldr"><input type="number" id="b-conc" step="1" value="22"><span class="post">%</span></div></div>
+          <div class="row"><label>Cash flow from operations (TTM)</label>
+            <div class="fldr"><span class="pre">$</span><input type="number" id="b-cfo" step="0.05" value="2.05"><span class="post">M</span></div></div>
+          <div class="row"><label>Preliminary Q-of-E variance vs reported</label>
+            <div class="fldr"><input type="number" id="b-var" step="0.5" value="4"><span class="post">%</span></div></div>
+          <div class="flags" id="b-flags"></div>
+          <p class="hint" style="margin-top:2px">House rule from Caprae&rsquo;s own diligence playbook: numbers off
+            <b>&lt;5%</b> — nobody cares; <b>6&ndash;7%</b> — red flag; <b>8&ndash;10%</b> — renegotiate the LOI.</p>
+        </div>
+      </div>
+
+      <!-- Panel C -->
+      <div class="wcard">
+        <div class="band"><h2>C &middot; Valuation bridge</h2><span class="ref">what each fix is worth, in dollars</span></div>
+        <div class="sect">
+          <p class="hint">Base range uses the house multiple tier for this size of business. Each fixable flaw below moves the multiple — the bridge quantifies the incentive to fix it <i>before</i> going to market.</p>
+          <div class="tbl-scroll"><table class="sc" id="c-tbl">
+            <tr><th>Lever</th><th>Multiple effect</th><th>Value</th></tr>
+            <tr><td>Adjusted EBITDA &times; base tier</td><td id="c-base-m">4.0&ndash;8.0&times;</td><td class="fx" id="c-base-v">$10.4M&ndash;$20.8M</td></tr>
+            <tr><td>Cut top-customer share below 15%</td><td>+0.50&times;</td><td id="c-f1">+$1.30M</td></tr>
+            <tr><td>Prove net dollar retention &ge;110%</td><td>+0.50&times;</td><td id="c-f2">+$1.30M</td></tr>
+            <tr><td>Bring DSO back to prior-year level</td><td>+0.25&times;</td><td id="c-f3">+$0.65M</td></tr>
+            <tr class="hl"><td>Seller-ready position</td><td id="c-top-m">up to 9.25&times;</td><td id="c-top-v">up to $24.1M</td></tr>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- Panel D -->
+      <div class="wcard">
+        <div class="band"><h2>D &middot; Scenarios — bear / base / bull</h2><span class="ref">three-year view</span></div>
+        <div class="sect">
+          <div class="tbl-scroll"><table class="sc">
+            <tr><th>Driver</th><th>Bear</th><th>Base</th><th>Bull</th></tr>
+            <tr><td>Revenue growth / yr</td>
+              <td><span class="fldr mini" style="display:inline-flex"><input class="mini" type="number" id="d-g1" step="1" value="-4"><span class="post">%</span></span></td>
+              <td><span class="fldr mini" style="display:inline-flex"><input class="mini" type="number" id="d-g2" step="1" value="4"><span class="post">%</span></span></td>
+              <td><span class="fldr mini" style="display:inline-flex"><input class="mini" type="number" id="d-g3" step="1" value="10"><span class="post">%</span></span></td></tr>
+            <tr><td>EBITDA margin, yr 3</td>
+              <td><span class="fldr mini" style="display:inline-flex"><input class="mini" type="number" id="d-m1" step="0.5" value="19"><span class="post">%</span></span></td>
+              <td><span class="fldr mini" style="display:inline-flex"><input class="mini" type="number" id="d-m2" step="0.5" value="22"><span class="post">%</span></span></td>
+              <td><span class="fldr mini" style="display:inline-flex"><input class="mini" type="number" id="d-m3" step="0.5" value="24"><span class="post">%</span></span></td></tr>
+            <tr><td>Exit multiple</td>
+              <td><span class="fldr mini" style="display:inline-flex"><input class="mini" type="number" id="d-x1" step="0.25" value="4"><span class="post">&times;</span></span></td>
+              <td><span class="fldr mini" style="display:inline-flex"><input class="mini" type="number" id="d-x2" step="0.25" value="5"><span class="post">&times;</span></span></td>
+              <td><span class="fldr mini" style="display:inline-flex"><input class="mini" type="number" id="d-x3" step="0.25" value="6.5"><span class="post">&times;</span></span></td></tr>
+            <tr><td>Year-3 EBITDA</td><td id="d-e1">$1.94M</td><td id="d-e2">$2.97M</td><td id="d-e3">$3.83M</td></tr>
+            <tr class="hl"><td>Enterprise value, yr 3</td><td id="d-v1">$7.8M</td><td id="d-v2">$14.8M</td><td id="d-v3">$24.9M</td></tr>
+          </table></div>
+          <p class="story" id="d-story"></p>
+        </div>
+      </div>
+
+      <details class="note">
+        <summary>Why this panel exists</summary>
+        <div class="body">
+          <p>From Caprae&rsquo;s own playbook: after a buyer passes on a deal, the seller gets
+            <b>&ldquo;a second assessment&hellip; optimistic, neutral, pessimistic — no one does this in the PE world.&rdquo;</b>
+            This tab productises that assessment: normalise the earnings, screen the quality, price the fixes,
+            and show the owner three honest futures. It is the analyst&rsquo;s half of Compass — the call co-pilot
+            wins the conversation; this wins the mandate.</p>
+          <p>All figures are fictional and illustrative. Method: multiple-on-adjusted-EBITDA with premium/discount
+            drivers, per lower-middle-market convention. Not investment advice.</p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <footer>
+    <b style="color:var(--gold)">COMPASS</b> — an unsolicited product prototype by <b style="color:var(--on-dark)">Malik Umar</b>,
+    built as part of an application to Caprae Capital. Not affiliated with or endorsed by Caprae Capital LLC.
+    All seller data on this page is fictional; nothing is saved or sent — every calculation runs in your browser.
+    Logic derived from Caprae&rsquo;s publicly shared training material.
+  </footer>
+</div>
+
+<script>
+/* Bundled copy of compass_playbook.js so the file is self-contained. Master lives in compass_playbook.js. */
+/* ============================================================================
+ * COMPASS — PLAYBOOK  (single source of truth the co-pilot runs on)
+ *
+ * Everything Compass "knows" lives here: valuation tiers, deal structures,
+ * plays (trigger -> multiple ways to say it), guardrails (what NOT to say),
+ * discovery questions, and a library of proven sales tactics. compass.html
+ * inlines an identical copy of this object and renders from it.
+ *
+ * The `lines` are written to be SAID OUT LOUD — natural, conversational, the
+ * way a warm, sharp dealmaker actually talks. They are prompts, not scripts.
+ *
+ * PROVENANCE
+ *   caprae    : Caprae Capital's own training (Kevin Hong's coaching).
+ *   framework : named methods — Voss (Never Split the Difference), Cialdini
+ *               (Influence), Rackham (SPIN), Dixon & Adamson (Challenger),
+ *               Sandler.
+ *
+ * INTEGRITY STANCE (read before adding anything)
+ *   Persuasion, never deception. We DELIBERATELY EXCLUDE the manipulative
+ *   material from the source calls (the fabricated "investment committee,"
+ *   the "one lie for every nine truths"). If a tactic only works because the
+ *   seller is misled, it does not belong in this file.
+ * ==========================================================================*/
+
+window.COMPASS_PLAYBOOK = {
+
+  meta: {
+    name: "Compass Playbook", version: "1.2", updated: "2026-08-19",
+    author: "Malik Umar",
+    principle: "Prompts, not scripts. Persuasion, never deception.",
+    note: "Indicative, pre-NDA guidance. Never replaces NDA -> financials -> data room -> assessment."
+  },
+
+  /* take-home (owner earnings) ~ EBITDA proxy on a call. [caprae] */
+  multiples: {
+    basis: "Applied to owner take-home / adjusted EBITDA. Software uses ARR on revenue.",
+    tiers: [
+      { lo: 3, hi: 5,  label: "under $1M owner earnings",  bound: "lt1" },
+      { lo: 4, hi: 8,  label: "$1-5M owner earnings",      bound: "lte5" },
+      { lo: 6, hi: 10, label: "over $5M owner earnings",   bound: "gt5" }
+    ],
+    software: { lo: 3, hi: 6, appliedTo: "revenue (ARR)", label: "3-6x ARR (software)" }
+  },
+
+  premiumDrivers: [
+    { id: "ndr",       test: "NDR >= 110%",                  effect: "+", note: "customers spend more each year -> top of range" },
+    { id: "conc_low",  test: "top customer < 15%",           effect: "+", note: "diversified revenue justifies a premium" },
+    { id: "conc_high", test: "top customer > 30%",           effect: "-", note: "concentration risk -> expect a discount" },
+    { id: "margin",    test: "high gross margin / low SG&A", effect: "+", note: "clean, scalable economics" },
+    { id: "recurring", test: "contracted / recurring",       effect: "+", note: "predictability commands a premium" }
+  ],
+
+  structures: [
+    { id: "cash_led", pref: "cashNow", excludes: "wantsStay", cashPct: 0.7, notePct: 0.3, rollPct: 0,
+      title: "Cash-led",
+      lines: [
+        "Most of it in cash at close - call it 70% - and we pay you the rest as a note over about three years.",
+        "You get the bulk up front, and spreading out the rest quietly keeps a big chunk away from the taxman."
+      ],
+      why: "The note spreads the tax hit - 'too much cash up front goes to Uncle Sam.' Frame it as a favour, not a discount.",
+      tactic: ["reciprocity", "loss_aversion"] },
+
+    { id: "second_bite", prefIn: ["stayInvolved", "legacy"], cashPct: 0.3, notePct: 0.3,
+      title: "The second bite",
+      lines: [
+        "Some real cash now, a steady payout over three years, and you roll 20-40% forward - that piece rides the next sale.",
+        "You take money off the table today and still own a slice that could be worth more than the whole thing is right now."
+      ],
+      why: "Rolled equity exits ~2 yrs after the last note payment. Frame it: 'two exits instead of one.'",
+      tactic: ["future_pacing", "unity"] },
+
+    { id: "price_seeker", pref: "maxPrice",
+      title: "Price seeker",
+      lines: [
+        "Let's not get stuck on the headline number - let's price what actually moves it: how sticky your revenue is, how spread-out, how clean the margins are.",
+        "If there's still a gap after that, we bridge it with a note - not an earnout you've got no control over."
+      ],
+      why: "Savvy sellers distrust earnouts. If unavoidable: tie to EBITDA, never revenue, with hard hurdles.",
+      tactic: ["challenger_reframe", "anchoring"] }
+  ],
+
+  guardrails: [
+    { id: "no_yesno",  avoid: "Any yes/no opener ('Is now a good time?', 'Have you considered selling?')",
+      instead: "A 'when' or 'no'-oriented question.", why: "Once they say 'no,' they act like a no." },
+    { id: "no_age",    avoid: "Citing the owner's age.", instead: "Cite tenure ('you've built this over 30 years').",
+      why: "Age insults; tenure respects. Same fact, better frame." },
+    { id: "no_incubator", avoid: "'Incubator' on a call.", instead: "'Sponsored search.'",
+      why: "'Incubator' confuses non-industry sellers." },
+    { id: "no_process", avoid: "'Round robin', 'right of first refusal', 'callable capital'.",
+      instead: "'Investment committee', 'committed capital', 'we move fast'.",
+      why: "Process words make the money sound loose." },
+    { id: "no_restructure", avoid: "Leading with debt / restructuring / layoffs.",
+      instead: "Lead with revenue growth, sales & marketing, AI-driven operational lift.",
+      why: "Nothing kills a founder call faster than 'load debt and fire your people.'" }
+  ],
+
+  /* ── PLAYS (lines are meant to be said out loud) ─────────────────────────── */
+  plays: [
+    { id: "opener", trigger: { empty: true }, type: "play", tag: "Next move", priority: 10,
+      lines: [
+        "Before you write this off as another cold call - is it a terrible time to grab five minutes?",
+        "Out of curiosity, have you ever given any real thought to bringing on a partner or taking a few chips off the table?",
+        "Tell you what - give me five minutes, and if it's not for you, just say the word and you'll never hear from me again."
+      ],
+      why: "Never a yes/no. A 'no' feels safe; a 'when' assumes the frame; the up-front out lowers the shields.",
+      tactic: ["no_question", "upfront_contract"], source: "caprae+framework" },
+
+    { id: "gatekeeper", trigger: { who: "gatekeeper" }, type: "play", tag: "Next move", priority: 30,
+      lines: [
+        "I'll be quick - we've been looking closely at businesses in your space this quarter. When's a good time to catch the owner?",
+        "I don't want to waste anyone's time - is this the kind of thing they'd want to hear about directly?",
+        "What's usually the best way to get ten minutes on their calendar?"
+      ],
+      why: "Don't pitch the gatekeeper. Get a time, a name, and out.",
+      tactic: ["calibrated_q"], source: "caprae" },
+
+    { id: "partner", trigger: { who: "partner" }, type: "play", tag: "Next move", priority: 30,
+      lines: [
+        "How do the two of you usually handle a decision like this one?",
+        "Who else would want a seat at the table for a conversation about where the business goes next?",
+        "What would make a proper conversation worth both your time?"
+      ],
+      why: "A partner can champion or block. Map the decision before you pitch.",
+      tactic: ["calibrated_q"], source: "framework" },
+
+    { id: "owner_story", trigger: { all: [{ who: "owner" }, { not: { tenure: "*" } }] }, type: "play", tag: "Next move", priority: 25,
+      lines: [
+        "You've clearly been at this a while - how did you get into it in the first place?",
+        "What's the part of this you're proudest of?",
+        "Whatever they just said, repeat the last few words back as a question and let them run with it."
+      ],
+      why: "People tell you their story before their numbers. Open the thread.",
+      tactic: ["mirroring"], source: "caprae" },
+
+    { id: "tenure_motivation", trigger: { all: [{ tenureIn: ["mid", "short"] }, { noSignals: true }] }, type: "play", tag: "Next move", priority: 22,
+      lines: [
+        "When you picture the next few years - are you looking to keep running it, bring someone in, or start easing back?",
+        "If nothing changed and you just kept going for another five years, where do you think it lands?",
+        "If you ever did step back, what's the one thing you'd want handled right?"
+      ],
+      why: "Under 25 yrs and no signal yet. Surface the motivation before you price anything.",
+      tactic: ["calibrated_q", "spin_implication"], source: "framework" },
+
+    { id: "legacy", trigger: { tenure: "long" }, type: "play", tag: "Play - legacy", priority: 40,
+      lines: [
+        "You've poured 30-odd years into this - how's the tank feeling these days?",
+        "Sounds like this place is a lot more than a balance sheet to you.",
+        "When the day comes to hand it over, what has to be true about the person who takes the wheel?"
+      ],
+      why: "Long tenure = succession is THE conversation. The LeBron/Luka handoff.",
+      tactic: ["labeling", "future_pacing"], source: "caprae" },
+
+    { id: "guard_age", trigger: { tenure: "long" }, type: "guard", tag: "Guardrail", priority: 39,
+      lines: ["Don't say a word about their age. 'You've built this over 30 years' lands; 'you're getting up there' ends the call."],
+      why: "Age insults; tenure respects. Same fact, better frame.",
+      tactic: [], source: "caprae" },
+
+    { id: "co_founder", trigger: { succIn: ["kidsNo", "noKids"] }, type: "play", tag: "Play - the co-founder line", priority: 45,
+      lines: [
+        "Honestly, founders like you are exactly who we look for - think of us as the co-founder you never had. If there's still gas in the tank, we run it back together and you get a second bite, not just one.",
+        "Picture this thing twice the size in five years - and the slice you kept worth more than the whole business is today.",
+        "The kids not wanting it isn't a dead end - it's exactly the moment the right partner matters most."
+      ],
+      why: "No successor = the legacy pitch. Sell the next parent for their baby, not the cheque.",
+      tactic: ["future_pacing", "unity", "loss_aversion"], source: "caprae" },
+
+    { id: "son", trigger: { any: [{ succ: "kidsYes" }, { sig: "family" }] }, type: "play", tag: "Next move", priority: 50,
+      lines: [
+        "Tell me about your son.",
+        "Is he in the business day-to-day right now, or off doing his own thing?",
+        "There might be a version where he keeps a stake and does what he actually loves, and we bring someone in to run the day-to-day - worth a look?"
+      ],
+      why: "Never 'is he interested?' (a yes/no). Get the boomer talking - the truth surfaces on its own.",
+      tactic: ["mirroring", "calibrated_q", "labeling"], source: "caprae" },
+
+    { id: "flip", trigger: { sig: "noNeed" }, type: "play", tag: "Play - the flip", priority: 60,
+      lines: [
+        "Honestly? The fact that you don't need us is exactly why now's the moment - while you're strong, let's build a war chest and go buy up your competitors. We'll fund it.",
+        "Look, if you're growing fast and loving it, maybe this isn't even for you.",
+        "The thing is, every year you sit tight, someone with real capital gets a little closer to your customers."
+      ],
+      why: "The strongest sellers say 'I don't need you.' Don't re-pitch the exit - flip to offence.",
+      tactic: ["negative_reverse", "loss_aversion", "challenger_reframe"], source: "caprae" },
+
+    { id: "speed", trigger: { sig: "burned" }, type: "play", tag: "Play - speed", priority: 60,
+      lines: [
+        "Yeah, I hear you - and that's the whole reason we work with committed money and a tiny decision group. From a signed NDA, we're closing in two to three months.",
+        "You're probably sitting there thinking I'm just another buyer who talks big and then drags it out for a year.",
+        "What actually went sideways last time - the price, the people, or just the process?"
+      ],
+      why: "Their pain is time-to-close. Sell certainty and speed, not price.",
+      tactic: ["accusation_audit", "loss_aversion", "calibrated_q"], source: "caprae" },
+
+    { id: "guard_process", trigger: { sig: "burned" }, type: "guard", tag: "Guardrail", priority: 59,
+      lines: ["Don't let 'round robin,' 'right of first refusal,' or 'incubator' slip out. Say 'committed capital,' 'our investment committee,' 'we move fast.'"],
+      why: "Process words make the money sound loose - burned sellers listen for exactly that.",
+      tactic: [], source: "caprae" },
+
+    { id: "premium", trigger: { sig: "lowballed" }, type: "play", tag: "Play - premium drivers", priority: 55,
+      lines: [
+        "Quick question - how spread out is your customer base? And do the regulars tend to spend more with you each year?",
+        "Most owners think it comes down to a multiple of profit - but honestly, the real driver is how concentrated and sticky the revenue is. Yours might be leaving a couple of turns on the table.",
+        "What do you think the last buyer completely missed about what makes this place work?"
+      ],
+      why: "Don't counter-quote a number. Probe the drivers that EARN the multiple, then anchor.",
+      tactic: ["challenger_reframe", "spin_implication"], source: "caprae" },
+
+    { id: "conflict", trigger: { all: [{ sig: "wantsStay" }, { pref: "cashNow" }] }, type: "flag", tag: "Conflict flag", priority: 95,
+      lines: [
+        "Sounds like you want some real money now, but you're not quite ready to hand over the keys - am I reading that right?",
+        "We can shape it so you get meaningful cash up front, a steady payout, and you keep a 20-30% stake - a seat at the table and a second payday.",
+        "What matters more on day one - the number on the cheque, or knowing you've still got a hand on the wheel?"
+      ],
+      why: "Name the tension out loud - it builds trust and sets up the blended structure.",
+      tactic: ["labeling", "tactical_empathy", "thats_right"], source: "caprae+framework" },
+
+    { id: "anchor", trigger: { hasNumbers: true }, type: "anchor", tag: "⚓ Anchor - say this", priority: 100,
+      lines: [
+        "A business like this, at that kind of cash flow, is usually somewhere around {lo} to {hi}. Out of curiosity - do you have a number in your head?",
+        "It moves a bit with things like customer mix and how clean the revenue is, but you're comfortably in the {lo}-{hi} range. What were you hoping to see?",
+        "I'm not going to lowball you - realistically you're looking at {lo} to {hi}. How does that sit next to what you had in mind?"
+      ],
+      why: "Anchoring: whoever frames the range first bends the talk toward it. Never quote to their ask - make them show theirs.",
+      tactic: ["anchoring", "calibrated_q", "challenger_reframe"], source: "caprae+framework" },
+
+    { id: "fallback", trigger: { fallback: true }, type: "play", tag: "Next move", priority: 5,
+      lines: [
+        "So what made you actually pick up today?",
+        "Mirror the last thing they said and let the silence do the work.",
+        "What's the part of this business you're most proud of?"
+      ],
+      why: "No cue has fired yet. Active listening beats the next line - get them to open up about the pain point.",
+      tactic: ["mirroring"], source: "framework" }
+  ],
+
+  /* ── KILLER SALES TACTICS ────────────────────────────────────────────────
+   * The "why it works" engine behind the plays. Named, real, ethical only.   */
+  tactics: [
+    { id: "no_question", name: "'No'-oriented question", origin: "Voss",
+      principle: "People feel safe and in control saying 'no.' A question engineered for a 'no' lowers the drawbridge.",
+      useIt: "“Is now a ridiculous time to talk?”  “Have you given up on ever selling?”",
+      caution: "Genuinely give them the out - it only works because the 'no' is real." },
+    { id: "upfront_contract", name: "Up-front contract", origin: "Sandler",
+      principle: "Set the agenda and a mutual escape hatch up front; resistance drops when the ask is bounded.",
+      useIt: "“Five minutes - if it's not a fit, tell me and I'll never call again.”",
+      caution: "Honour the out instantly if they take it." },
+    { id: "tactical_empathy", name: "Tactical empathy", origin: "Voss",
+      principle: "Show you understand their world before advancing yours. Understanding is not agreeing.",
+      useIt: "“It sounds like this business is more than a balance sheet to you.”",
+      caution: "Real listening only - sellers smell scripted empathy (Kevin's #1 critique)." },
+    { id: "labeling", name: "Labeling", origin: "Voss",
+      principle: "Name the emotion out loud to defuse the negative and reinforce the positive.",
+      useIt: "“It seems like you've been burned by a buyer before.”",
+      caution: "Label, then go quiet - let silence pull the answer out." },
+    { id: "mirroring", name: "Mirroring", origin: "Voss",
+      principle: "Repeat their last 1-3 words as a question - it signals listening and makes them elaborate for free.",
+      useIt: "Seller: '...just couldn't close.'  You: “Couldn't close?”",
+      caution: "Use sparingly or it sounds like a parrot." },
+    { id: "accusation_audit", name: "Accusation audit", origin: "Voss",
+      principle: "Say their objection before they do; pre-empting the worst thing they think about you disarms it.",
+      useIt: "“You're probably thinking I'm just another PE guy who's never run a business.”",
+      caution: "Land it lightly, with a smile - a disarm, not a confession." },
+    { id: "thats_right", name: "Trigger 'That's right'", origin: "Voss",
+      principle: "Summarise their situation so well they say 'that's right' (not 'you're right' - that's dismissal). The turn.",
+      useIt: "“So you'd sell to the right home even for a bit less - that's the picture?”",
+      caution: "If you get 'you're right,' you pushed - back off and listen." },
+    { id: "calibrated_q", name: "Calibrated How/What question", origin: "Voss",
+      principle: "How/What questions give the other side the illusion of control while they hand you information.",
+      useIt: "“What's the biggest challenge the business is facing?”",
+      caution: "Avoid 'why' - it feels like an accusation." },
+    { id: "loss_aversion", name: "Loss aversion / cost of status quo", origin: "Kahneman; Voss",
+      principle: "People work harder to avoid a loss than chase a gain. Frame the concrete cost of doing nothing.",
+      useIt: "“Every year you wait, a competitor with a war chest gets closer to your customers.”",
+      caution: "State a real risk, not manufactured fear." },
+    { id: "spin_implication", name: "Implication questions", origin: "Rackham - SPIN",
+      principle: "Make the problem bigger in their own mind before offering the fix.",
+      useIt: "“If your number two left tomorrow, what happens to the business - and to what a buyer pays?”",
+      caution: "Diagnosis, not scare tactics - the implication must be one they'd agree is real." },
+    { id: "challenger_reframe", name: "Commercial teaching / reframe", origin: "Dixon & Adamson - Challenger",
+      principle: "Lead with an insight that reframes how they see their own business. Teach -> tailor -> take control.",
+      useIt: "“The real lever isn't profit multiple - it's customer concentration, and yours may cost two turns.”",
+      caution: "The insight must be true and specific to them, or it's just a slogan." },
+    { id: "anchoring", name: "Anchoring", origin: "Tversky/Kahneman; Voss range",
+      principle: "The first credible number frames the whole negotiation. Drop a defensible range first.",
+      useIt: "“Businesses like yours tend to trade $8-16M... do you have a number in mind?”",
+      caution: "High-but-defensible. An indefensible anchor destroys credibility." },
+    { id: "negative_reverse", name: "Negative reverse / take-away", origin: "Sandler",
+      principle: "Gently suggest it might NOT be a fit; scarcity of your interest triggers their pursuit.",
+      useIt: "“If you're growing this fast and happy, this might not even be for you.”",
+      caution: "Only take away what you'd genuinely walk from." },
+    { id: "future_pacing", name: "Future pacing / second-bite vision", origin: "Persuasion (ethical use)",
+      principle: "Get them to vividly picture the good outcome; imagined ownership pulls harder than features.",
+      useIt: "“Picture your rolled stake worth more in five years than the whole business today.”",
+      caution: "A plausible future, not a fantasy - it must survive diligence." },
+    { id: "reciprocity", name: "Reciprocity", origin: "Cialdini",
+      principle: "Give real value first; people feel compelled to give back. The free assessment IS this.",
+      useIt: "“Worst case, you get a professional valuation and growth read, on us.”",
+      caution: "The gift must be genuinely valuable, or it reads as a bribe." },
+    { id: "social_proof", name: "Social proof", origin: "Cialdini",
+      principle: "People follow others like them. Reference comparable owners/deals in their world.",
+      useIt: "“We just helped an owner in a similar industry structure a partial exit and stay on.”",
+      caution: "Only cite real comps - a fabricated one is exactly the deception this file bans." },
+    { id: "authority", name: "Authority via track record", origin: "Cialdini; 'answer data with data' (Kevin)",
+      principle: "Credibility comes from specific, verifiable numbers - not adjectives or mission talk.",
+      useIt: "“Our operator took his last acquisition from down 15% to up 15%; investors repaid early.”",
+      caution: "Lead with the operator's numbers, never 'our mission.'" },
+    { id: "unity", name: "Unity / founder-to-founder", origin: "Cialdini (7th principle)",
+      principle: "The strongest 'liking' is shared identity - 'people like us.' Founder-to-founder beats buyer-to-target.",
+      useIt: "“I've built and sold companies myself - I get what you're handing over.”",
+      caution: "Must be true of the operator you represent." }
+  ],
+
+  vocabulary: {
+    say:   ["sponsored search", "investment committee", "committed capital",
+            "the co-founder you never had", "two exits instead of one",
+            "you've built this over 30 years", "do you have a number in mind?"],
+    avoid: ["incubator", "round robin", "right of first refusal", "callable capital",
+            "is now a good time?", "you're 50+ / getting up there",
+            "we'll load it with debt", "let me tell you our mission"]
+  }
+};
+
+</script>
+
+<script>
+"use strict";
+/* The co-pilot runs entirely off COMPASS_PLAYBOOK (see compass_playbook.js). */
+const PLAYBOOK=window.COMPASS_PLAYBOOK;
+const TIDX=Object.fromEntries(PLAYBOOK.tactics.map(t=>[t.id,t]));
+const $=id=>document.getElementById(id);
+const fM=x=>"$"+(Math.round(x*10)/10).toFixed(1)+"M";
+const num=id=>{const v=parseFloat($(id).value);return isFinite(v)?v:0};
+
+/* ───────── tabs ───────── */
+function showTab(n){
+  $("pane1").classList.toggle("on",n===1);
+  $("pane2").classList.toggle("on",n===2);
+  $("tabbtn1").setAttribute("aria-selected",n===1);
+  $("tabbtn2").setAttribute("aria-selected",n===2);
+}
+window.showTab=showTab;
+
+/* ═════════ TAB 1 — state ═════════ */
+const S={who:null,tenure:null,succ:null,sig:new Set(),ind:null,pref:null,hor:null,
+         rev:0,th:0,ndr:0,conc:0,last:null};
+
+/* ── Single-select across the whole sheet: only the latest choice stays active ──
+   Two "signal" sources: (A) one qualitative chip, or (B) the numbers block
+   (revenue/take-home/etc. + industry). Choosing one clears the other, so the
+   co-pilot always reflects exactly one thing. */
+function clearQual(){
+  ["g-who","g-tenure","g-succ","g-sig","g-pref","g-hor"].forEach(g=>{
+    const el=$(g); if(el)[...el.children].forEach(c=>c.classList.remove("sel"));
+  });
+  S.who=S.tenure=S.succ=S.pref=S.hor=null; S.sig.clear();
+}
+function clearNumbers(){
+  S.rev=S.th=S.ndr=S.conc=0; S.ind=null;
+  ["n-rev","n-th","n-ndr","n-conc"].forEach(id=>{const el=$(id); if(el)el.value="";});
+  const gi=$("g-ind"); if(gi)[...gi.children].forEach(c=>c.classList.remove("sel"));
+}
+
+function bindQual(gid,key){
+  const g=$(gid);
+  g.addEventListener("click",e=>{
+    const b=e.target.closest(".chip");if(!b)return;
+    const was=b.classList.contains("sel");
+    clearQual(); clearNumbers();                 // wipe everything else
+    if(!was){ b.classList.add("sel"); S[key]=b.dataset.v; }   // re-click = deselect
+    S.last=key; recompute();
+  });
+}
+bindQual("g-who","who");bindQual("g-tenure","tenure");bindQual("g-succ","succ");
+bindQual("g-pref","pref");bindQual("g-hor","hor");
+
+$("g-sig").addEventListener("click",e=>{
+  const b=e.target.closest(".chip");if(!b)return;
+  const v=b.dataset.v, was=S.sig.has(v);
+  clearQual(); clearNumbers();
+  if(!was){ S.sig.add(v); b.classList.add("sel"); }
+  S.last="sig:"+v; recompute();
+});
+
+/* Industry is part of the numbers block: it clears the qualitative chips but
+   keeps any numbers you've typed. */
+$("g-ind").addEventListener("click",e=>{
+  const b=e.target.closest(".chip");if(!b)return;
+  clearQual();
+  [...$("g-ind").children].forEach(c=>c.classList.remove("sel"));
+  b.classList.add("sel"); S.ind=b.dataset.v;
+  S.last="ind"; recompute();
+});
+
+["n-rev","n-th","n-ndr","n-conc"].forEach(id=>$(id).addEventListener("input",()=>{
+  clearQual();                                   // numbers become the active signal
+  if(!S.ind){ S.ind="services"; const s=document.querySelector('#g-ind .chip[data-v="services"]'); if(s)s.classList.add("sel"); }
+  S.rev=num("n-rev");S.th=num("n-th");S.ndr=num("n-ndr");S.conc=num("n-conc");
+  S.last="numbers"; recompute();
+}));
+
+/* ───────── trigger evaluation (matches a play's declarative trigger to S) ───────── */
+function matches(t,ctx){
+  for(const k in t){ const v=t[k]; let ok=true;
+    switch(k){
+      case "empty":      ok=(!S.who&&!S.tenure&&!S.pref&&!S.hor&&S.sig.size===0&&!S.th&&!S.rev)===v; break;
+      case "fallback":   ok=false; break;
+      case "hasNumbers": ok=(!!ctx.anchor)===v; break;
+      case "noSignals":  ok=(S.sig.size===0)===v; break;
+      case "who":        ok=S.who===v; break;
+      case "whoIn":      ok=v.includes(S.who); break;
+      case "tenure":     ok=v==="*"?!!S.tenure:S.tenure===v; break;
+      case "tenureIn":   ok=v.includes(S.tenure); break;
+      case "succ":       ok=S.succ===v; break;
+      case "succIn":     ok=v.includes(S.succ); break;
+      case "pref":       ok=S.pref===v; break;
+      case "sig":        ok=S.sig.has(v); break;
+      case "not":        ok=!matches(v,ctx); break;
+      case "all":        ok=v.every(x=>matches(x,ctx)); break;
+      case "any":        ok=v.some(x=>matches(x,ctx)); break;
+      default:           ok=true;
+    }
+    if(!ok)return false;
+  }
+  return true;
+}
+function fillTokens(str,a){ return a?str.replace(/\{lo\}/g,fM(a.lo)).replace(/\{hi\}/g,fM(a.hi)):str; }
+
+/* ───────── Anchor engine (tiers from the playbook) ───────── */
+function anchor(){
+  const M=PLAYBOOK.multiples;
+  if(S.ind==="software"){
+    if(S.rev<=0)return null;
+    return {lo:S.rev*M.software.lo,hi:S.rev*M.software.hi,basis:M.software.label,ebitda:null};
+  }
+  if(S.th<=0)return null;
+  const tier=S.th<1?M.tiers[0]:S.th<=5?M.tiers[1]:M.tiers[2];
+  return {lo:S.th*tier.lo,hi:S.th*tier.hi,
+          basis:tier.lo+"–"+tier.hi+"× ("+tier.label+") on ~"+fM(S.th)+" take-home",ebitda:S.th};
+}
+
+/* ───────── structure card (shapes from the playbook) ───────── */
+function pickStructure(){
+  if(S.pref==="cashNow"&&S.sig.has("wantsStay"))return null; // conflict flag handles it
+  return PLAYBOOK.structures.find(s=>{
+    if(s.excludes&&S.sig.has(s.excludes))return false;
+    if(s.pref)return S.pref===s.pref;
+    if(s.prefIn)return s.prefIn.includes(S.pref);
+    return false;
+  })||null;
+}
+function structureCard(a){
+  const s=pickStructure(); if(!s)return null;
+  const lines=s.lines.slice();
+  if(a){
+    const ev=(a.lo+a.hi)/2;
+    if(s.id==="cash_led")
+      lines.push("On a mid ~"+fM(ev)+" deal: ~"+fM(ev*0.7)+" wired at close, ~"+fM(ev*0.3/3)+"/yr for three years.");
+    else if(s.id==="second_bite"){
+      const roll=S.hor==="short"?20:40;
+      lines.push("On a mid ~"+fM(ev)+" deal: ~"+fM(ev*0.3)+" cash now, "+roll+"% rolled for the second bite.");
+    }
+  }
+  return {group:"structure",type:"play",tag:"Structure — "+s.title,lines,why:s.why,
+          tactics:(s.tactic||[]).map(id=>TIDX[id]).filter(Boolean),priority:90};
+}
+
+/* ───────── build cards from the playbook ───────── */
+function makeCard(p,a){
+  return {group:p.id,type:p.type,tag:p.tag,
+          lines:p.lines.map(L=>fillTokens(L,a)),why:p.why,
+          tactics:(p.tactic||[]).map(id=>TIDX[id]).filter(Boolean),priority:p.priority};
+}
+function buildCards(){
+  const a=anchor(), ctx={anchor:a}, cards=[];
+  // A gatekeeper isn't the owner — the only cue is to reach them; suppress owner-directed plays.
+  if(S.who==="gatekeeper")return [makeCard(PLAYBOOK.plays.find(p=>p.id==="gatekeeper"),a)];
+  PLAYBOOK.plays.forEach(p=>{
+    if(p.trigger.fallback)return;
+    if(matches(p.trigger,ctx))cards.push(makeCard(p,a));
+  });
+  const st=structureCard(a); if(st)cards.push(st);
+  // Anchor drivers: append premium/discount notes to the anchor card's coaching.
+  if(a){
+    const ac=cards.find(c=>c.group==="anchor"), chips=[];
+    if(S.ndr>=110)chips.push("NDR ≥110% → push to the top of the range");
+    if(S.conc&&S.conc<15)chips.push("top customer <15% → premium justified");
+    if(S.conc>30)chips.push("top customer >30% → expect a discount");
+    if(ac)ac.why=ac.why+(chips.length?("  Drivers: "+chips.join("; ")+"."):"")+"  ("+a.basis+")";
+  }
+  // Safety net: the rail never goes blank once a call is underway.
+  if(cards.length===0)cards.push(makeCard(PLAYBOOK.plays.find(p=>p.id==="fallback"),a));
+  return cards;
+}
+
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function renderRail(cards){
+  cards.sort((x,y)=>y.priority-x.priority);
+  const top=cards.slice(0,3);
+  const host=$("cards");host.innerHTML="";
+  if(top.length===0){
+    host.innerHTML='<div class="rail-empty">Tap the call sheet as the seller talks — guidance appears here, a few cards at a time.</div>';
+  }
+  top.forEach(k=>{
+    const d=document.createElement("div");
+    d.className="ccard"+(k.type==="guard"?" guard":k.type==="flag"?" flag":"");
+    let html='<span class="tag">'+esc(k.tag)+'</span><p class="say">'+esc(k.lines[0])+'</p>';
+    if(k.lines.length>1){
+      html+='<details class="moreways"><summary>more ways to say it ('+(k.lines.length-1)+')</summary><ul>'
+           +k.lines.slice(1).map(L=>'<li>'+esc(L)+'</li>').join('')+'</ul></details>';
+    }
+    html+='<p class="why">'+esc(k.why)+'</p>';
+    if(k.tactics&&k.tactics.length){
+      html+='<div class="tacts">'+k.tactics.map(t=>'<span class="tact" title="'+esc(t.principle)+'">'+esc(t.name)+'</span>').join('')+'</div>';
+      html+='<p class="tacthow"><b>Why it works — '+esc(k.tactics[0].name)+':</b> '+esc(k.tactics[0].principle)+'</p>';
+    }
+    d.innerHTML=html;
+    host.appendChild(d);
+  });
+  $("rail-count").textContent=cards.length?("showing "+top.length+" of "+cards.length+" cues"):"listening…";
+}
+
+/* ───────── ledger ───────── */
+const LBL={who:{owner:"Owner",partner:"Partner",gatekeeper:"Gatekeeper"},
+  tenure:{short:"<10 yrs",mid:"10–25 yrs",long:"25+ yrs"},
+  succ:{kidsYes:"Kids interested",kidsNo:"Kids not interested",noKids:"No kids",hasPartner:"Has partner"},
+  pref:{cashNow:"Cash now",stayInvolved:"Stay involved",maxPrice:"Max price",legacy:"Legacy"},
+  hor:{short:"1–2 yrs",long:"3–5 yrs"},
+  sig:{wantsOut:"wants out",wantsStay:"wants to stay",noNeed:"“doesn’t need us”",burned:"burned before",lowballed:"lowballed",family:"family business"}};
+
+function temperature(){
+  let t=20;
+  if(S.sig.has("wantsOut"))t+=25;
+  if(S.sig.has("lowballed"))t+=15;
+  if(S.sig.has("burned"))t+=10;
+  if(S.sig.has("wantsStay"))t+=10;
+  if(S.sig.has("noNeed"))t-=10;
+  if(S.succ==="kidsNo"||S.succ==="noKids")t+=10;
+  if(S.th>0||S.rev>0)t+=20;
+  if(S.pref)t+=10;
+  return Math.max(5,Math.min(95,t));
+}
+
+function summary(a){
+  const p=[];
+  let s1="Spoke with "+(S.who?LBL.who[S.who].toLowerCase():"a contact");
+  if(S.ind)s1+=" at a "+(S.ind==="software"?"software":S.ind==="services"?"services":"")+" business";
+  if(S.rev||S.th){const bits=[];if(S.rev)bits.push("~"+fM(S.rev)+" revenue");if(S.th)bits.push("~"+fM(S.th)+" take-home");s1+=" ("+bits.join(", ")+")";}
+  if(S.tenure)s1+=", "+LBL.tenure[S.tenure]+" tenure";
+  p.push(s1+".");
+  if(S.succ==="kidsNo")p.push("The kids aren’t interested in taking over — legacy and the right home matter here.");
+  if(S.succ==="kidsYes")p.push("Family succession is on the table; probe how involved the next generation really is.");
+  if(S.sig.has("burned"))p.push("They were burned by a slow buyer before — speed and certainty of close are the levers.");
+  if(S.sig.has("noNeed"))p.push("They don’t need capital, which makes the war-chest / buy-your-competitors angle the play.");
+  if(S.sig.has("lowballed"))p.push("They feel prior offers lowballed them — premium drivers (NDR, concentration) are the path to a defensible higher number.");
+  if(a)p.push("Indicative anchor discussed: "+fM(a.lo)+"–"+fM(a.hi)+".");
+  if(S.pref)p.push("Preference: "+LBL.pref[S.pref].toLowerCase()+(S.hor?(", staying "+LBL.hor[S.hor]):"")+".");
+  p.push("Next step: mutual NDA → three years of financials → free assessment inside two weeks.");
+  return p;
+}
+
+function recompute(){
+  const cards=buildCards();
+  const a=anchor();
+  const strip=$("anchor-strip");
+  if(a){strip.hidden=false;$("anchor-range").textContent=fM(a.lo)+" – "+fM(a.hi);$("anchor-note").textContent=a.basis;}
+  else strip.hidden=true;
+  renderRail(cards);
+
+  const captures=(S.who?1:0)+(S.tenure?1:0)+(S.succ?1:0)+(S.pref?1:0)+S.sig.size+((S.th>0||S.rev>0)?1:0);
+  const led=$("ledger");
+  if(captures>=1){
+    led.hidden=false;
+    const t=temperature();
+    $("temp-fill").style.width=t+"%";
+    $("temp-lab").textContent=(t>65?"HOT":t>=35?"WARM":"COLD")+" · "+t;
+    const rows=[];
+    if(S.who)rows.push(["Contact",LBL.who[S.who]]);
+    if(S.tenure)rows.push(["Tenure",LBL.tenure[S.tenure]]);
+    if(S.succ)rows.push(["Succession",LBL.succ[S.succ]]);
+    if(S.sig.size)rows.push(["Signals",[...S.sig].map(v=>LBL.sig[v]).join(", ")]);
+    if(S.rev)rows.push(["Revenue",fM(S.rev)]);
+    if(S.th)rows.push(["Take-home",fM(S.th)]);
+    if(S.ndr)rows.push(["NDR",S.ndr+"%"]);
+    if(S.conc)rows.push(["Top customer",S.conc+"%"]);
+    if(a)rows.push(["Anchor",fM(a.lo)+"–"+fM(a.hi)]);
+    if(S.pref)rows.push(["Preference",LBL.pref[S.pref]+(S.hor?(" · "+LBL.hor[S.hor]):"")]);
+    $("facts-tbl").innerHTML=rows.map(r=>"<tr><td>"+r[0]+"</td><td>"+r[1]+"</td></tr>").join("");
+    $("brief-txt").innerHTML=summary(a).map(s=>"<p>"+s+"</p>").join("");
+    const st=structureCard(a);
+    const row=[new Date().toISOString().slice(0,10),S.ind||"—",S.rev?S.rev+"M":"—",S.th?S.th+"M":"—",
+      a?(fM(a.lo)+"-"+fM(a.hi)):"—",st?st.tag.replace("Structure — ",""):(S.sig.has("wantsStay")&&S.pref==="cashNow"?"blended":"—"),
+      (temperature())+"",S.sig.size?[...S.sig].join("+"):"—","NDA→financials→assessment"].join(" | ");
+    $("row-txt").textContent=row;
+  } else led.hidden=true;
+}
+
+$("copy-row").addEventListener("click",()=>{
+  const txt=$("row-txt").textContent;
+  const done=()=>{$("copy-row").textContent="Copied ✓";setTimeout(()=>$("copy-row").textContent="Copy database row",1400);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,()=>fallbackCopy(txt,done));}
+  else fallbackCopy(txt,done);
+});
+function fallbackCopy(txt,done){
+  const ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);
+  ta.select();try{document.execCommand("copy");}catch(e){}
+  document.body.removeChild(ta);done();
+}
+$("reset-call").addEventListener("click",()=>{
+  S.who=S.tenure=S.succ=S.pref=S.hor=null;S.sig.clear();S.ind=null;
+  S.rev=S.th=S.ndr=S.conc=0;S.last=null;
+  document.querySelectorAll("#pane1 .chip").forEach(c=>c.classList.remove("sel"));
+  ["n-rev","n-th","n-ndr","n-conc"].forEach(id=>$(id).value="");
+  recompute();window.scrollTo({top:0});
+});
+
+/* ═════════ TAB 2 — assessment math ═════════ */
+const T2=["a-rev","a-ebitda","a-osal","a-msal","a-oneoff","a-rentp","a-rentm",
+          "b-dso1","b-dso0","b-conc","b-cfo","b-var",
+          "d-g1","d-g2","d-g3","d-m1","d-m2","d-m3","d-x1","d-x2","d-x3"];
+function tier(e){return e<1?[3,5]:e<=5?[4,8]:[6,10];}
+function flag(cls,title,desc){return '<div class="flg '+cls+'"><p class="t"><span class="dot"></span>'+title+'</p><p class="d">'+desc+"</p></div>";}
+
+function calc2(){
+  const rev=num("a-rev"),rep=num("a-ebitda");
+  const addSal=num("a-osal")-num("a-msal");
+  const addRent=num("a-rentp")-num("a-rentm");
+  const oneoff=num("a-oneoff");
+  const adj=rep+addSal+oneoff+addRent;
+  $("a-c1").textContent=(addSal>=0?"+ ":"− ")+fM(Math.abs(addSal));
+  $("a-c2").textContent=(addRent>=0?"+ ":"− ")+fM(Math.abs(addRent));
+  $("a-out").textContent=fM(adj);
+  $("t-adj").textContent=fM(adj);
+
+  /* flags */
+  const drift=num("b-dso1")-num("b-dso0");
+  const conc=num("b-conc");
+  const conv=adj>0?num("b-cfo")/adj*100:0;
+  const qv=num("b-var");
+  let fh="";
+  fh+=flag(drift<=5?"good":drift<=12?"warn":"bad","DSO drift · "+(drift>=0?"+":"")+drift+" days",
+    drift>12?"Receivables growing far faster than sales — probe collections and channel stuffing.":drift>5?"Mild drift — worth a question in diligence.":"Collections stable.");
+  fh+=flag(conc<15?"good":conc<=30?"warn":"bad","Concentration · "+conc+"%",
+    conc>30?"Over 30% in one customer — buyers will discount hard.":conc>=15?"15–30% zone — expect questions; below 15% earns a premium.":"Well diversified — premium justified.");
+  fh+=flag(conv>=75?"good":conv>=60?"warn":"bad","Cash conversion · "+Math.round(conv)+"%",
+    conv<60?"EBITDA isn’t turning into cash — accruals need a hard look.":conv<75?"Below the comfort line — check working-capital swings.":"Earnings are backed by cash.");
+  fh+=flag(qv<5?"good":qv<8?"warn":"bad","Q-of-E variance · "+qv+"%",
+    qv>=8?"8%+ off reported — renegotiate the LOI.":qv>=5?"6–7% zone — red flag, dig in.":"Under 5% — within tolerance; nobody cares.");
+  $("b-flags").innerHTML=fh;
+
+  /* bridge */
+  const[lo,hi]=tier(adj);
+  $("t-range").textContent=fM(adj*lo)+"–"+fM(adj*hi);
+  $("t-mult").textContent=lo+"–"+hi+"× adjusted EBITDA";
+  $("c-base-m").textContent=lo.toFixed(1)+"–"+hi.toFixed(1)+"×";
+  $("c-base-v").textContent=fM(adj*lo)+"–"+fM(adj*hi);
+  const f1=.5*adj,f2=.5*adj,f3=.25*adj;
+  $("c-f1").textContent="+"+fM(f1);$("c-f2").textContent="+"+fM(f2);$("c-f3").textContent="+"+fM(f3);
+  $("c-top-m").textContent="up to "+(hi+1.25).toFixed(2)+"×";
+  $("c-top-v").textContent="up to "+fM(adj*hi+f1+f2+f3);
+  $("t-fix").textContent="+"+fM(f1+f2+f3);
+
+  /* scenarios */
+  const sc=[["d-g1","d-m1","d-x1","d-e1","d-v1"],["d-g2","d-m2","d-x2","d-e2","d-v2"],["d-g3","d-m3","d-x3","d-e3","d-v3"]];
+  const evs=[];
+  sc.forEach(s=>{
+    const g=num(s[0])/100,m=num(s[1])/100,x=num(s[2]);
+    const r3=rev*Math.pow(1+g,3),e3=r3*m,v3=e3*x;
+    evs.push(v3);
+    $(s[3]).textContent=fM(e3);$(s[4]).textContent=fM(v3);
+  });
+  $("d-story").textContent="Bear: a key customer walks and margins compress — "+fM(evs[0])+
+    ". Base: steady growth with modest operational fixes — "+fM(evs[1])+
+    ". Bull: concentration fixed, NDR proven, AI-led efficiency lands — "+fM(evs[2])+".";
+}
+T2.forEach(id=>$(id).addEventListener("input",calc2));
+
+recompute();calc2();
+</script>
